@@ -26,6 +26,8 @@
       --category-note: #F7BA1E;     /* 学习笔记：暖黄 */
       --category-life: #36CFC9;     /* 生活记录：青绿 */
       --category-all: #86909C;      /* 全部：浅灰 */
+      --gallery-mask: rgba(0, 0, 0, 0.85); /* 图片画廊遮罩色 */
+      --blog-modal-mask: rgba(0, 0, 0, 0.7); /* 博客详情遮罩色 */
     }
 
     * {
@@ -40,6 +42,7 @@
       color: var(--text-color);
       line-height: 1.7;
       padding-bottom: 60px;
+      overflow-x: hidden; /* 防止画廊滑动时页面横向滚动 */
     }
 
     .container {
@@ -296,7 +299,7 @@
       gap: 22px;
     }
 
-    /* 博客卡片（适配有图/无图） */
+    /* 博客卡片（适配有图/无图/图片类） */
     .work-card {
       background-color: var(--card-bg);
       border-radius: 10px;
@@ -305,6 +308,7 @@
       transition: var(--transition);
       display: flex;
       flex-direction: column;
+      cursor: pointer; /* 图片类博客卡片添加指针样式 */
     }
 
     .work-card:hover {
@@ -399,6 +403,17 @@
       background-color: var(--category-life);
     }
 
+    /* 图片类博客标识 */
+    .image-gallery-tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 6px;
+      background-color: rgba(22, 93, 255, 0.1);
+      color: var(--category-video);
+      font-size: 11px;
+      border-radius: 3px;
+    }
+
     .work-title {
       font-size: 17px;
       margin-bottom: 10px;
@@ -426,6 +441,7 @@
       transition: var(--transition);
       font-size: 14px;
       align-self: flex-start;
+      cursor: pointer; /* 改为指针样式 */
     }
 
     .work-link:hover {
@@ -436,6 +452,356 @@
     .work-link i {
       margin-left: 4px;
       font-size: 12px;
+    }
+
+    /* 图片画廊弹窗（核心新增） */
+    .image-gallery {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--gallery-mask);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .gallery-active {
+      display: flex;
+    }
+
+    .gallery-container {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      height: 80vh;
+      max-height: 800px;
+    }
+
+    .gallery-slide {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: rgba(0,0,0,0.2);
+    }
+
+    /* 画廊控制按钮 */
+    .gallery-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .gallery-btn:hover {
+      background-color: rgba(255,255,255,0.3);
+    }
+
+    .gallery-prev {
+      left: -60px;
+    }
+
+    .gallery-next {
+      right: -60px;
+    }
+
+    /* 画廊关闭按钮 */
+    .gallery-close {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      color: white;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .gallery-close:hover {
+      color: #ddd;
+    }
+
+    /* 画廊图片索引 */
+    .gallery-index {
+      position: absolute;
+      bottom: -30px;
+      left: 0;
+      color: white;
+      font-size: 14px;
+    }
+
+    /* 触摸滑动样式 */
+    .gallery-slide-container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gallery-slide-wrapper {
+      display: flex;
+      height: 100%;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .gallery-slide-item {
+      min-width: 100%;
+      height: 100%;
+    }
+
+    /* 博客详情弹窗（核心新增：解析MD文件） */
+    .blog-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--blog-modal-mask);
+      z-index: 9999;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+
+    .blog-modal-active {
+      display: flex;
+    }
+
+    .blog-modal-content {
+      width: 100%;
+      max-width: 900px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      padding: 30px;
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .blog-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: rgba(0,0,0,0.05);
+      color: var(--light-text);
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .blog-modal-close:hover {
+      background-color: rgba(0,0,0,0.1);
+      color: var(--text-color);
+    }
+
+    .blog-modal-header {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .blog-modal-category {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: white;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .blog-modal-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .blog-modal-meta {
+      color: var(--light-text);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .blog-modal-meta i {
+      margin-right: 4px;
+    }
+
+    /* MD解析后的内容样式（美化） */
+    .blog-modal-body {
+      color: var(--text-color);
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    .blog-modal-body h1,
+    .blog-modal-body h2,
+    .blog-modal-body h3,
+    .blog-modal-body h4,
+    .blog-modal-body h5,
+    .blog-modal-body h6 {
+      margin: 25px 0 15px;
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    .blog-modal-body h1 {
+      font-size: 28px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .blog-modal-body h2 {
+      font-size: 24px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+    }
+
+    .blog-modal-body h3 {
+      font-size: 20px;
+    }
+
+    .blog-modal-body p {
+      margin-bottom: 18px;
+    }
+
+    .blog-modal-body img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .blog-modal-body a {
+      color: var(--category-video);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(22, 93, 255, 0.3);
+      transition: var(--transition);
+    }
+
+    .blog-modal-body a:hover {
+      color: #0e42d2;
+      border-bottom-color: var(--category-video);
+    }
+
+    .blog-modal-body ul,
+    .blog-modal-body ol {
+      margin: 15px 0 15px 25px;
+      padding-left: 10px;
+    }
+
+    .blog-modal-body li {
+      margin-bottom: 8px;
+    }
+
+    .blog-modal-body blockquote {
+      border-left: 4px solid var(--category-video);
+      padding: 10px 15px;
+      margin: 15px 0;
+      background-color: rgba(22, 93, 255, 0.03);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .blog-modal-body code {
+      background-color: rgba(0,0,0,0.04);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+
+    .blog-modal-body pre {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      overflow-x: auto;
+      border: 1px solid #eee;
+    }
+
+    .blog-modal-body pre code {
+      background: none;
+      padding: 0;
+      font-size: 14px;
+    }
+
+    .blog-modal-loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--light-text);
+    }
+
+    .blog-modal-loading i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: var(--category-video);
+      animation: spin 1.5s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .blog-modal-error {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--light-text);
+    }
+
+    .blog-modal-error i {
+      font-size: 48px;
+      margin-bottom: 15px;
+      color: #ff4d4f;
+    }
+
+    .blog-modal-error button {
+      margin-top: 20px;
+      padding: 8px 16px;
+      background-color: var(--category-video);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .blog-modal-error button:hover {
+      background-color: #0e42d2;
     }
 
     /* 页脚 */
@@ -500,6 +866,64 @@
       .work-img, .work-img-placeholder {
         height: 150px;
       }
+
+      /* 移动端画廊适配 */
+      .gallery-container {
+        height: 70vh;
+      }
+
+      .gallery-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+
+      .gallery-prev {
+        left: 10px;
+      }
+
+      .gallery-next {
+        right: 10px;
+      }
+
+      .gallery-close {
+        top: -35px;
+        font-size: 20px;
+      }
+
+      .gallery-index {
+        bottom: -25px;
+      }
+
+      /* 移动端博客详情弹窗适配 */
+      .blog-modal {
+        padding: 20px 10px;
+      }
+
+      .blog-modal-content {
+        padding: 20px 15px;
+      }
+
+      .blog-modal-title {
+        font-size: 20px;
+      }
+
+      .blog-modal-body {
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .blog-modal-body h1 {
+        font-size: 24px;
+      }
+
+      .blog-modal-body h2 {
+        font-size: 20px;
+      }
+
+      .blog-modal-body h3 {
+        font-size: 18px;
+      }
     }
 
     @media (max-width: 480px) {
@@ -523,6 +947,10 @@
       .category-btn i {
         font-size: 12px;
       }
+
+      .gallery-container {
+        height: 60vh;
+      }
     }
   </style>
 </head>
@@ -545,9 +973,9 @@
           <div class="tech-stack">
             <div class="tech-item">嵌入式Linux</div>
             <div class="tech-item">C/C++</div>
-            <div class="tech-item">驱动开发</div>
-            <div class="tech-item">音视频</div>
             <div class="tech-item">linux应用开发</div>
+            <div class="tech-item">音视频</div>
+            <div class="tech-item">驱动开发</div>
             <div class="tech-item">单片机</div>
             <div class="tech-item">QT</div>
           </div>
@@ -564,16 +992,16 @@
         </div>
         <div class="contact">
           <a href="https://github.com/liujinbo-boy" target="_blank" class="contact-item">
-            <i class="fab fa-github" style="color: #333;"></i> GitHub
+            <i class="fab fa-github" style="color: #333;"></i> GitHub链接
           </a>
           <a href="mailto:liujinbo1234@qq.com" target="_blank" class="contact-item">
-            <i class="fas fa-envelope" style="color: #1a73e8;"></i> QQ邮箱
+            <i class="fas fa-envelope" style="color: #1a73e8;"></i> liujinbo1234@qq.com
           </a>
           <a href="https://qzone.qq.com/3225933788" target="_blank" class="contact-item">
-            <i class="fab fa-qq" style="color: #1a73e8;"></i> QQ
+            <i class="fab fa-qq" style="color: #1a73e8;"></i> 3225933788
           </a>
           <a href="https://weixin.qq.com/" target="_blank" class="contact-item">
-            <i class="fab fa-weixin" style="color: #07c160;"></i> 微信
+            <i class="fab fa-weixin" style="color: #07c160;"></i> L17752785918
           </a>
         </div>
       </div>
@@ -622,6 +1050,43 @@
     </footer>
   </div>
 
+  <!-- 图片画廊弹窗（核心新增） -->
+  <div class="image-gallery" id="imageGallery">
+    <div class="gallery-container">
+      <button class="gallery-close" onclick="closeGallery()"><i class="fas fa-times"></i></button>
+      <div class="gallery-slide-container">
+        <div class="gallery-slide-wrapper" id="gallerySlideWrapper">
+          <!-- 图片将动态插入这里 -->
+        </div>
+      </div>
+      <button class="gallery-btn gallery-prev" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+      <button class="gallery-btn gallery-next" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+      <div class="gallery-index" id="galleryIndex">1/3</div>
+    </div>
+  </div>
+
+  <!-- 博客详情弹窗（核心新增：解析MD） -->
+  <div class="blog-modal" id="blogModal">
+    <div class="blog-modal-content">
+      <button class="blog-modal-close" onclick="closeBlogModal()"><i class="fas fa-times"></i></button>
+      <div class="blog-modal-header">
+        <span class="blog-modal-category" id="blogModalCategory"></span>
+        <h2 class="blog-modal-title" id="blogModalTitle"></h2>
+        <div class="blog-modal-meta">
+          <span><i class="far fa-calendar-alt"></i> 2025年</span>
+          <span><i class="far fa-folder"></i> <span id="blogModalCategoryText"></span></span>
+        </div>
+      </div>
+      <div class="blog-modal-body" id="blogModalBody">
+        <!-- 加载状态 -->
+        <div class="blog-modal-loading">
+          <i class="fas fa-spinner"></i>
+          <p>加载中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 引入Markdown解析库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
   <!-- 引入代码高亮库 -->
@@ -630,27 +1095,56 @@
     // 初始化代码高亮
     hljs.highlightAll();
 
-    // 博客数据（更新分类为你的4类，支持有图/无图）
+    // 全局变量：当前图片画廊索引
+    let currentGalleryIndex = 0;
+    let currentGalleryImages = [];
+
+    // 分类文本映射（用于博客详情弹窗）
+    const categoryTextMap = {
+      video: '音视频内容',
+      essay: '随笔感悟',
+      note: '学习笔记',
+      life: '生活记录'
+    };
+
+    // 分类颜色映射（用于博客详情弹窗）
+    const categoryColorMap = {
+      video: 'var(--category-video)',
+      essay: 'var(--category-essay)',
+      note: 'var(--category-note)',
+      life: 'var(--category-life)'
+    };
+
+    // 博客数据（完整配置）
     const blogData = [
       {
         title: "sip协议中的NAT穿透研究",
         excerpt: "采用sip协议实现双向对讲的过程中，遇到过NAT穿透问题，以下是个人的实战经验总结",
         cover: "", // 无图
-        markdown: "blog/sip/sip中的NAT穿透研究.md",
+        markdown: "blog/sip/SIP中的NAT穿透研究.md",
         keywords: "音视频,NAT,sip",
-        category: "音视频"
-      }，
+        category: "video",
+        isImageGallery: false, // 普通文字博客
+        date: "2025-10-30" // 新增日期字段
+      },
       {
-        title: "记录一次骑行中的思考",
-        excerpt: "周末骑行时路过的田野和村庄，突然对生活有了新的感悟：慢下来，才能发现更多美好。",
-        cover: "", // 无图（留空即可）
-        markdown: "good_time/惠州西湖骑行/惠州西湖骑行.md",
-        keywords: "骑行,生活,随笔,感悟",
-        category: "essay"
+        title: "惠州植物园随拍",
+        excerpt: "",
+        cover: "images/gallery/xihu1.jpg", // 封面图（显示在卡片上）
+        images: [ // 图片类博客：多张图片路径数组
+          "good_time/picture/plant1.jpg",
+          "good_time/picture/plant2.jpg",
+          "good_time/picture/plant3.jpg",
+          "good_time/picture/plant4.jpg",
+        ],
+        keywords: "生活记录,随拍,惠州植物园",
+        category: "life",
+        isImageGallery: true, // 标记为图片类博客
+        date: "2025-11-02"
       }
     ];
 
-    // 生成博客卡片（适配有图/无图）
+    // 生成博客卡片（适配普通博客/图片类博客）
     function renderBlogCards(blogs) {
       const worksList = document.getElementById('worksList');
       worksList.innerHTML = '';
@@ -677,28 +1171,26 @@
           note: 'fas fa-book-open',
           life: 'fas fa-camera-retro'
         };
-        const categoryTextMap = {
-          video: '音视频内容',
-          essay: '随笔感悟',
-          note: '学习笔记',
-          life: '生活记录'
-        };
 
-        // 动态生成有图/无图卡片内容
+        // 动态生成卡片内容（区分普通博客/图片类博客）
+        let cardContent = '';
         if (blog.cover) {
-          // 有图卡片
-          card.innerHTML = `
+          // 有封面图（普通博客/图片类博客共用）
+          cardContent = `
             <img src="${blog.cover}" alt="${blog.title}" class="work-img">
             <div class="work-content">
               <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
-              <h3 class="work-title">${blog.title}</h3>
+              <h3 class="work-title">
+                ${blog.title}
+                ${blog.isImageGallery ? '<span class="image-gallery-tag"><i class="fas fa-images"></i> 多图</span>' : ''}
+              </h3>
               <p class="work-excerpt">${blog.excerpt}</p>
-              <a href="${blog.markdown}" target="_blank" class="work-link">阅读全文 <i class="fas fa-arrow-right"></i></a>
+              ${blog.isImageGallery ? '' : '<div class="work-link" onclick="openBlogModal(this)" data-blog-index="' + blogs.indexOf(blog) + '">阅读全文 <i class="fas fa-arrow-right"></i></div>'}
             </div>
           `;
         } else {
-          // 无图卡片（美化占位区）
-          card.innerHTML = `
+          // 无封面图（普通博客）
+          cardContent = `
             <div class="work-img-placeholder ${blog.category}">
               <i class="${categoryIconMap[blog.category]}"></i>
               <span>${categoryTextMap[blog.category]}</span>
@@ -707,16 +1199,255 @@
               <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
               <h3 class="work-title">${blog.title}</h3>
               <p class="work-excerpt">${blog.excerpt}</p>
-              <a href="${blog.markdown}" target="_blank" class="work-link">阅读全文 <i class="fas fa-arrow-right"></i></a>
+              <div class="work-link" onclick="openBlogModal(this)" data-blog-index="${blogs.indexOf(blog)}">阅读全文 <i class="fas fa-arrow-right"></i></div>
             </div>
           `;
+        }
+
+        card.innerHTML = cardContent;
+
+        // 绑定点击事件（图片类博客打开画廊，普通博客点击"阅读全文"打开弹窗）
+        if (blog.isImageGallery) {
+          card.onclick = function() {
+            openGallery(blog.images);
+          };
+        } else {
+          // 普通博客：卡片其他区域不响应点击，只有"阅读全文"可点击
+          card.style.cursor = 'default';
         }
 
         worksList.appendChild(card);
       });
     }
 
-    // 分类过滤功能（适配新分类）
+    // 打开图片画廊（核心功能）
+    function openGallery(images) {
+      currentGalleryImages = images;
+      currentGalleryIndex = 0;
+      
+      const galleryWrapper = document.getElementById('gallerySlideWrapper');
+      const galleryIndex = document.getElementById('galleryIndex');
+      
+      // 清空画廊内容
+      galleryWrapper.innerHTML = '';
+      
+      // 插入所有图片
+      images.forEach(imgSrc => {
+        const slideItem = document.createElement('div');
+        slideItem.className = 'gallery-slide-item';
+        slideItem.innerHTML = `<img src="${imgSrc}" alt="画廊图片" class="gallery-img">`;
+        galleryWrapper.appendChild(slideItem);
+      });
+      
+      // 更新索引
+      galleryIndex.textContent = `${currentGalleryIndex + 1}/${images.length}`;
+      
+      // 显示画廊
+      document.getElementById('imageGallery').classList.add('gallery-active');
+      
+      // 禁止页面滚动
+      document.body.style.overflow = 'hidden';
+    }
+
+    // 关闭图片画廊（核心功能）
+    function closeGallery() {
+      document.getElementById('imageGallery').classList.remove('gallery-active');
+      document.body.style.overflow = 'auto'; // 恢复页面滚动
+    }
+
+    // 上一张图片（核心功能）
+    function prevSlide() {
+      if (currentGalleryIndex > 0) {
+        currentGalleryIndex--;
+        updateGallerySlide();
+      }
+    }
+
+    // 下一张图片（核心功能）
+    function nextSlide() {
+      if (currentGalleryIndex < currentGalleryImages.length - 1) {
+        currentGalleryIndex++;
+        updateGallerySlide();
+      }
+    }
+
+    // 更新画廊滑动位置（核心功能）
+    function updateGallerySlide() {
+      const galleryWrapper = document.getElementById('gallerySlideWrapper');
+      const galleryIndex = document.getElementById('galleryIndex');
+      const slideWidth = galleryWrapper.clientWidth;
+      
+      // 滑动到对应图片
+      galleryWrapper.style.transform = `translateX(-${currentGalleryIndex * slideWidth}px)`;
+      
+      // 更新索引
+      galleryIndex.textContent = `${currentGalleryIndex + 1}/${currentGalleryImages.length}`;
+    }
+
+    // 触摸滑动支持（核心功能）
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    const galleryContainer = document.querySelector('.gallery-container');
+    galleryContainer.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+    });
+    
+    galleryContainer.addEventListener('touchend', function(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      const touchDiff = touchEndX - touchStartX;
+      
+      // 滑动距离超过50px才触发切换
+      if (touchDiff > 50) {
+        prevSlide(); // 向右滑：上一张
+      } else if (touchDiff < -50) {
+        nextSlide(); // 向左滑：下一张
+      }
+    });
+
+    // 点击遮罩关闭画廊
+    document.getElementById('imageGallery').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeGallery();
+      }
+    });
+
+    // 键盘控制画廊（核心功能）
+    document.addEventListener('keydown', function(e) {
+      const isGalleryActive = document.getElementById('imageGallery').classList.contains('gallery-active');
+      const isBlogModalActive = document.getElementById('blogModal').classList.contains('blog-modal-active');
+      
+      if (isGalleryActive && !isBlogModalActive) {
+        switch(e.key) {
+          case 'ArrowLeft':
+            prevSlide();
+            break;
+          case 'ArrowRight':
+            nextSlide();
+            break;
+          case 'Escape':
+            closeGallery();
+            break;
+        }
+      } else if (isBlogModalActive && !isGalleryActive) {
+        if (e.key === 'Escape') {
+          closeBlogModal();
+        }
+      }
+    });
+
+    // 打开博客详情弹窗（核心新增：解析MD）
+    function openBlogModal(elem) {
+      const blogIndex = elem.getAttribute('data-blog-index');
+      const blog = blogData[blogIndex];
+      
+      // 填充弹窗头部信息
+      const modalCategory = document.getElementById('blogModalCategory');
+      const modalTitle = document.getElementById('blogModalTitle');
+      const modalCategoryText = document.getElementById('blogModalCategoryText');
+      const modalBody = document.getElementById('blogModalBody');
+      
+      // 设置分类标签颜色和文本
+      modalCategory.textContent = categoryTextMap[blog.category];
+      modalCategory.style.backgroundColor = categoryColorMap[blog.category];
+      modalTitle.textContent = blog.title;
+      modalCategoryText.textContent = categoryTextMap[blog.category];
+      
+      // 显示加载状态
+      modalBody.innerHTML = `
+        <div class="blog-modal-loading">
+          <i class="fas fa-spinner"></i>
+          <p>加载中...</p>
+        </div>
+      `;
+      
+      // 显示弹窗
+      document.getElementById('blogModal').classList.add('blog-modal-active');
+      document.body.style.overflow = 'hidden'; // 禁止页面滚动
+      
+      // 加载并解析MD文件
+      fetch(blog.markdown)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('文件加载失败');
+          }
+          return response.text();
+        })
+        .then(markdownContent => {
+          // 用marked.js解析MD为HTML
+          const htmlContent = marked.parse(markdownContent);
+          modalBody.innerHTML = htmlContent;
+          
+          // 代码高亮（解析后重新执行高亮）
+          hljs.highlightAll();
+        })
+        .catch(error => {
+          // 显示错误状态
+          modalBody.innerHTML = `
+            <div class="blog-modal-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>博客加载失败</p>
+              <p style="margin-top: 8px; font-size: 14px;">可能是文件路径错误或网络问题</p>
+              <button onclick="reloadBlogModal(${blogIndex})">重试</button>
+            </div>
+          `;
+          console.error('MD文件加载失败：', error);
+        });
+    }
+
+    // 关闭博客详情弹窗（核心新增）
+    function closeBlogModal() {
+      document.getElementById('blogModal').classList.remove('blog-modal-active');
+      document.body.style.overflow = 'auto'; // 恢复页面滚动
+    }
+
+    // 重试加载博客（核心新增）
+    function reloadBlogModal(blogIndex) {
+      const blog = blogData[blogIndex];
+      const modalBody = document.getElementById('blogModalBody');
+      
+      // 重新显示加载状态
+      modalBody.innerHTML = `
+        <div class="blog-modal-loading">
+          <i class="fas fa-spinner"></i>
+          <p>重新加载中...</p>
+        </div>
+      `;
+      
+      // 重新加载并解析MD文件
+      fetch(blog.markdown)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('文件加载失败');
+          }
+          return response.text();
+        })
+        .then(markdownContent => {
+          const htmlContent = marked.parse(markdownContent);
+          modalBody.innerHTML = htmlContent;
+          hljs.highlightAll(); // 代码高亮
+        })
+        .catch(error => {
+          modalBody.innerHTML = `
+            <div class="blog-modal-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <p>仍然加载失败</p>
+              <p style="margin-top: 8px; font-size: 14px;">请检查MD文件路径是否正确</p>
+              <button onclick="reloadBlogModal(${blogIndex})">再次重试</button>
+            </div>
+          `;
+          console.error('MD文件重新加载失败：', error);
+        });
+    }
+
+    // 点击遮罩关闭博客弹窗
+    document.getElementById('blogModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeBlogModal();
+      }
+    });
+
+    // 分类过滤功能
     function filterByCategory(category) {
       // 更新按钮激活状态
       document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
@@ -730,7 +1461,7 @@
       renderBlogCards(filteredBlogs);
     }
 
-    // 搜索功能（支持新分类）
+    // 搜索功能
     function searchBlogs() {
       const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
       const activeCategory = document.querySelector('.category-btn.active').classList[1];
@@ -755,6 +1486,13 @@
     document.getElementById('searchInput').addEventListener('keyup', function(e) {
       if (e.key === 'Enter') {
         searchBlogs();
+      }
+    });
+
+    // 窗口大小变化时更新画廊
+    window.addEventListener('resize', function() {
+      if (document.getElementById('imageGallery').classList.contains('gallery-active')) {
+        updateGallerySlide();
       }
     });
 
