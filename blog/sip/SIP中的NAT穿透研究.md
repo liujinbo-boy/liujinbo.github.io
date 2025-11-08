@@ -76,7 +76,7 @@ SIP 中 Caller 与 Callee 的通信包含**SIP 信令传输**和**媒体传输**
 
 #### 2.SDP的抓包分析
 
-![img](./pic/2.jpg)
+![img](./blog/sip/pic/2.jpg)
 
 
 
@@ -90,14 +90,14 @@ Media Description,name and address (m): 红色划线部分是媒体传输端口
 
 **STUN 协议的核心功能**：获取内网设备的公网ip和端口，识别内网设备的NAT限制类型
 
-![1](./pic/1.png)
+![1](./blog/sip/pic/1.png)
 
 ```
 Binding Request是 STUN 最基础的请求类型，用于获取 NAT 映射的公网 IP 和端口。
 Binding Success Response由STUN服务器返回，携带客户端的公网 IP 和端口（通过MAPPED-ADDRESS属性）。
 ```
 
-![image-20251103143743370](./pic/image-20251103143743370.png)
+![image-20251103143743370](./blog/sip/pic/image-20251103143743370.png)
 
 
 
