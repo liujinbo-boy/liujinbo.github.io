@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>嵌入式Linux探索者 | 个人博客</title>
+  <!-- 引入Font Awesome图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- 引入代码高亮样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css">
+  <style>
+    :root {
+      --bg-color: #F8F9FA; /* 柔和护眼背景色 */
+      --text-color: #333;  /* 文字主色 */
+      --light-text: #666;  /* 次要文字色 */
+      --card-bg: #FFFFFF;  /* 卡片背景 */
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 柔和阴影 */
+      --hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.09); /* hover阴影 */
+      --avatar-border: 4px solid rgba(54, 207, 201, 0.15); /* 头像边框 */
+      --transition: all 0.3s ease-in-out; /* 流畅过渡 */
+      --spacing: 8px; /* 基础间距 */
+
+      /* 新分类颜色（柔和且区分明显，支持后期扩展） */
+      --category-video: #165DFF;    /* 音视频：科技蓝 */
+      --category-essay: #722ED1;    /* 随笔：温柔紫 */
+      --category-note: #F7BA1E;     /* 学习笔记：暖黄 */
+      --category-life: #36CFC9;     /* 生活记录：青绿 */
+      --category-all: #86909C;      /* 全部：浅灰 */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.7;
+      padding-bottom: 60px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 15px;
+    }
+
+    /* 导航栏 */
+    .navbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--category-video);
+      letter-spacing: 0.5px;
+    }
+
+    /* 个人介绍区域 */
+    .profile {
+      display: flex;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 30px;
+      margin-bottom: 30px;
+      transition: var(--transition);
+      align-items: center;
+    }
+
+    .profile:hover {
+      box-shadow: var(--hover-shadow);
+      transform: translateY(-2px);
+    }
+
+    /* 圆形头像强化 */
+    .profile-avatar {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 30px;
+      border: var(--avatar-border);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      transition: var(--transition);
+    }
+
+    .profile-avatar:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-size: 26px;
+      margin-bottom: 6px;
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    .profile-desc {
+      color: var(--light-text);
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .profile-bio {
+      margin-bottom: 18px;
+      line-height: 1.8;
+      font-size: 15px;
+      color: var(--text-color);
+    }
+
+    .tech-stack, .hobbies {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      gap: 8px;
+    }
+
+    .tech-item, .hobby-item {
+      background-color: rgba(54, 207, 201, 0.08);
+      color: var(--category-life);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .tech-item:hover, .hobby-item:hover {
+      background-color: rgba(54, 207, 201, 0.15);
+      transform: translateY(-1px);
+    }
+
+    /* 联系区域 */
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      gap: 15px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      color: var(--light-text);
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .contact-item i {
+      font-size: 18px;
+      margin-right: 6px;
+    }
+
+    .contact-item:hover {
+      color: var(--category-video);
+      background-color: rgba(22, 93, 255, 0.05);
+    }
+
+    /* 博客标题+搜索栏 组合 */
+    .works-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .works-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-color);
+      padding-bottom: 4px;
+      border-bottom: 2px solid var(--category-video);
+    }
+
+    /* 搜索栏 */
+    .blog-search-box {
+      display: flex;
+      align-items: center;
+      width: 280px;
+      max-width: 100%;
+    }
+
+    .blog-search-box input {
+      flex: 1;
+      padding: 9px 14px;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px 0 0 6px;
+      outline: none;
+      font-size: 14px;
+      transition: var(--transition);
+      background-color: rgba(255,255,255,0.8);
+    }
+
+    .blog-search-box input:focus {
+      border-color: var(--category-video);
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+    }
+
+    .blog-search-box button {
+      padding: 9px 14px;
+      background-color: var(--category-video);
+      color: white;
+      border: none;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+    }
+
+    .blog-search-box button:hover {
+      background-color: #0e42d2;
+      transform: translateY(-1px);
+    }
+
+    /* 美化分类按钮（核心优化） */
+    .category-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 25px;
+      justify-content: center;
+    }
+
+    .category-btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 24px; /* 超圆润按钮 */
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px; /* 图标与文字间距 */
+      background: linear-gradient(135deg, var(--category-all), var(--category-all)); /* 基础渐变 */
+    }
+
+    /* 每个分类专属渐变+图标 */
+    .category-btn.all {
+      background: linear-gradient(135deg, var(--category-all), #6c757d);
+    }
+    .category-btn.video {
+      background: linear-gradient(135deg, var(--category-video), #0e42d2);
+    }
+    .category-btn.essay {
+      background: linear-gradient(135deg, var(--category-essay), #5a23b5);
+    }
+    .category-btn.note {
+      background: linear-gradient(135deg, var(--category-note), #d9a518);
+    }
+    .category-btn.life {
+      background: linear-gradient(135deg, var(--category-life), #2ba8a2);
+    }
+
+    /* hover/active效果强化 */
+    .category-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      opacity: 0.98;
+    }
+    .category-btn.active {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 9px rgba(0,0,0,0.1);
+      filter: brightness(1.05); /* 激活时略微提亮 */
+    }
+
+    /* 作品区域 */
+    .works {
+      margin-top: 10px;
+    }
+
+    .works-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 22px;
+    }
+
+    /* 博客卡片（适配有图/无图） */
+    .work-card {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .work-card:hover {
+      box-shadow: var(--hover-shadow);
+      transform: translateY(-3px);
+    }
+
+    /* 有图卡片的图片样式 */
+    .work-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+    .work-card:hover .work-img {
+      transform: scale(1.03);
+    }
+
+    /* 无图卡片的美化占位区（核心优化） */
+    .work-img-placeholder {
+      width: 100%;
+      height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: var(--transition);
+      background: linear-gradient(135deg, var(--category-all), #6c757d); /* 基础渐变 */
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* 无图占位区按分类变色 */
+    .work-img-placeholder.video {
+      background: linear-gradient(135deg, var(--category-video), #0e42d2);
+    }
+    .work-img-placeholder.essay {
+      background: linear-gradient(135deg, var(--category-essay), #5a23b5);
+    }
+    .work-img-placeholder.note {
+      background: linear-gradient(135deg, var(--category-note), #d9a518);
+    }
+    .work-img-placeholder.life {
+      background: linear-gradient(135deg, var(--category-life), #2ba8a2);
+    }
+
+    .work-img-placeholder i {
+      font-size: 36px;
+      margin-bottom: 10px;
+      opacity: 0.8;
+    }
+    .work-img-placeholder span {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .work-card:hover .work-img-placeholder {
+      filter: brightness(1.1);
+    }
+
+    /* 卡片内容区 */
+    .work-content {
+      padding: 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 分类标签 */
+    .work-category {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: white;
+      margin-bottom: 10px;
+      font-weight: 500;
+      background-color: var(--category-all);
+    }
+
+    /* 分类标签颜色适配 */
+    .work-category.video {
+      background-color: var(--category-video);
+    }
+    .work-category.essay {
+      background-color: var(--category-essay);
+    }
+    .work-category.note {
+      background-color: var(--category-note);
+    }
+    .work-category.life {
+      background-color: var(--category-life);
+    }
+
+    .work-title {
+      font-size: 17px;
+      margin-bottom: 10px;
+      color: var(--text-color);
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .work-excerpt {
+      color: var(--light-text);
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .work-link {
+      display: inline-block;
+      color: var(--category-video);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      font-size: 14px;
+      align-self: flex-start;
+    }
+
+    .work-link:hover {
+      text-decoration: underline;
+      color: #0e42d2;
+    }
+
+    .work-link i {
+      margin-left: 4px;
+      font-size: 12px;
+    }
+
+    /* 页脚 */
+    .footer {
+      text-align: center;
+      padding: 25px 0;
+      margin-top: 40px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      color: var(--light-text);
+      font-size: 14px;
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .profile {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 25px 20px;
+      }
+
+      .profile-avatar {
+        margin-right: 0;
+        margin-bottom: 20px;
+        width: 120px;
+        height: 120px;
+      }
+
+      .tech-stack, .hobbies {
+        justify-content: center;
+      }
+
+      .contact {
+        justify-content: center;
+      }
+
+      .works-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .blog-search-box {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      .category-buttons {
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .category-btn {
+        padding: 7px 16px;
+        font-size: 13px;
+      }
+
+      .works-list {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .work-img, .work-img-placeholder {
+        height: 150px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 22px;
+      }
+
+      .profile-name {
+        font-size: 24px;
+      }
+
+      .works-title {
+        font-size: 20px;
+      }
+
+      .category-btn {
+        padding: 6px 12px;
+        gap: 6px;
+      }
+
+      .category-btn i {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 导航栏 -->
+    <nav class="navbar">
+      <div class="logo">嵌入式Linux探索者</div>
+    </nav>
+
+    <!-- 个人介绍区域 -->
+    <section class="profile">
+      <img src="website/bobo.jpg" alt="个人头像" class="profile-avatar">
+      <div class="profile-info">
+        <h2 class="profile-name">bobo</h2>
+        <p class="profile-desc">嵌入式Linux开发工程师 | 技术爱好者 | 生活记录者</p>
+        <p class="profile-bio">你好！欢迎来到我的个人小站～ 这里记录了我在嵌入式Linux领域的学习心得、项目实践，以及生活中的点滴瞬间。希望我的分享能给你带来一点帮助，也期待和你一起交流成长！</p>
+        <div>
+          <strong style="color: var(--light-text); font-weight: 500;">技术栈：</strong>
+          <div class="tech-stack">
+            <div class="tech-item">嵌入式Linux</div>
+            <div class="tech-item">C/C++</div>
+            <div class="tech-item">驱动开发</div>
+            <div class="tech-item">音视频</div>
+            <div class="tech-item">linux应用开发</div>
+            <div class="tech-item">单片机</div>
+            <div class="tech-item">QT</div>
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <strong style="color: var(--light-text); font-weight: 500;">兴趣爱好：</strong>
+          <div class="hobbies">
+            <div class="hobby-item">编程</div>
+            <div class="hobby-item">抽象</div>
+            <div class="hobby-item">骑行</div>
+            <div class="hobby-item">阅读</div>
+            <div class="hobby-item">music</div>
+          </div>
+        </div>
+        <div class="contact">
+          <a href="https://github.com/liujinbo-boy" target="_blank" class="contact-item">
+            <i class="fab fa-github" style="color: #333;"></i> GitHub
+          </a>
+          <a href="mailto:liujinbo1234@qq.com" target="_blank" class="contact-item">
+            <i class="fas fa-envelope" style="color: #1a73e8;"></i> QQ邮箱
+          </a>
+          <a href="https://qzone.qq.com/3225933788" target="_blank" class="contact-item">
+            <i class="fab fa-qq" style="color: #1a73e8;"></i> QQ
+          </a>
+          <a href="https://weixin.qq.com/" target="_blank" class="contact-item">
+            <i class="fab fa-weixin" style="color: #07c160;"></i> 微信
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 博客作品展示区域 -->
+    <section class="works">
+      <!-- 标题+搜索栏 组合 -->
+      <div class="works-header">
+        <h2 class="works-title">我的博客作品</h2>
+        <div class="blog-search-box">
+          <input type="text" id="searchInput" placeholder="搜索关键词（如：驱动开发、生活）...">
+          <button onclick="searchBlogs()"><i class="fas fa-search"></i></button>
+        </div>
+      </div>
+
+      <!-- 美化分类按钮（更新为你的4个分类+全部） -->
+      <div class="category-buttons">
+        <button class="category-btn all active" onclick="filterByCategory('all')">
+          <i class="fas fa-th"></i> 全部
+        </button>
+        <button class="category-btn video" onclick="filterByCategory('video')">
+          <i class="fas fa-video"></i> 音视频
+        </button>
+        <button class="category-btn essay" onclick="filterByCategory('essay')">
+          <i class="fas fa-pen-fancy"></i> 随笔
+        </button>
+        <button class="category-btn note" onclick="filterByCategory('note')">
+          <i class="fas fa-book-open"></i> 学习笔记
+        </button>
+        <button class="category-btn life" onclick="filterByCategory('life')">
+          <i class="fas fa-camera-retro"></i> 生活记录
+        </button>
+      </div>
+
+      <!-- 博客列表 -->
+      <div class="works-list" id="worksList">
+        <!-- 博客卡片将通过JavaScript动态生成 -->
+      </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+      <p>© 2025 bobo | 嵌入式Linux技术分享与生活记录</p>
+      <p style="margin-top: 6px; font-size: 13px;">愿我们在技术的道路上越走越远，生活越来越精彩～</p>
+    </footer>
+  </div>
+
+  <!-- 引入Markdown解析库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <!-- 引入代码高亮库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script>
+    // 初始化代码高亮
+    hljs.highlightAll();
+
+    // 博客数据（更新分类为你的4类，支持有图/无图）
+    const blogData = [
+      {
+        title: "sip协议中的NAT穿透研究",
+        excerpt: "采用sip协议实现双向对讲的过程中，遇到过NAT穿透问题，以下是个人的实战经验总结",
+        cover: "", // 无图
+        markdown: "blog/sip/sip中的NAT穿透研究.md",
+        keywords: "音视频,NAT,sip",
+        category: "音视频"
+      }，
+      {
+        title: "记录一次骑行中的思考",
+        excerpt: "周末骑行时路过的田野和村庄，突然对生活有了新的感悟：慢下来，才能发现更多美好。",
+        cover: "", // 无图（留空即可）
+        markdown: "good_time/惠州西湖骑行/惠州西湖骑行.md",
+        keywords: "骑行,生活,随笔,感悟",
+        category: "essay"
+      }
+    ];
+
+    // 生成博客卡片（适配有图/无图）
+    function renderBlogCards(blogs) {
+      const worksList = document.getElementById('worksList');
+      worksList.innerHTML = '';
+      
+      if (blogs.length === 0) {
+        worksList.innerHTML = `
+          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--light-text); background-color: var(--card-bg); border-radius: 10px; box-shadow: var(--card-shadow);">
+            <i class="fas fa-search" style="font-size: 36px; margin-bottom: 15px; color: #ddd;"></i>
+            <p style="font-size: 16px; margin-bottom: 8px;">暂无匹配的博客~</p>
+            <p style="font-size: 14px;">试试更换关键词或分类吧</p>
+          </div>
+        `;
+        return;
+      }
+
+      blogs.forEach(blog => {
+        const card = document.createElement('div');
+        card.className = 'work-card';
+        
+        // 分类对应的图标（用于无图占位区）
+        const categoryIconMap = {
+          video: 'fas fa-video',
+          essay: 'fas fa-pen-fancy',
+          note: 'fas fa-book-open',
+          life: 'fas fa-camera-retro'
+        };
+        const categoryTextMap = {
+          video: '音视频内容',
+          essay: '随笔感悟',
+          note: '学习笔记',
+          life: '生活记录'
+        };
+
+        // 动态生成有图/无图卡片内容
+        if (blog.cover) {
+          // 有图卡片
+          card.innerHTML = `
+            <img src="${blog.cover}" alt="${blog.title}" class="work-img">
+            <div class="work-content">
+              <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
+              <h3 class="work-title">${blog.title}</h3>
+              <p class="work-excerpt">${blog.excerpt}</p>
+              <a href="${blog.markdown}" target="_blank" class="work-link">阅读全文 <i class="fas fa-arrow-right"></i></a>
+            </div>
+          `;
+        } else {
+          // 无图卡片（美化占位区）
+          card.innerHTML = `
+            <div class="work-img-placeholder ${blog.category}">
+              <i class="${categoryIconMap[blog.category]}"></i>
+              <span>${categoryTextMap[blog.category]}</span>
+            </div>
+            <div class="work-content">
+              <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
+              <h3 class="work-title">${blog.title}</h3>
+              <p class="work-excerpt">${blog.excerpt}</p>
+              <a href="${blog.markdown}" target="_blank" class="work-link">阅读全文 <i class="fas fa-arrow-right"></i></a>
+            </div>
+          `;
+        }
+
+        worksList.appendChild(card);
+      });
+    }
+
+    // 分类过滤功能（适配新分类）
+    function filterByCategory(category) {
+      // 更新按钮激活状态
+      document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.category-btn.${category}`).classList.add('active');
+      
+      // 过滤博客
+      let filteredBlogs = blogData;
+      if (category !== 'all') {
+        filteredBlogs = blogData.filter(blog => blog.category === category);
+      }
+      renderBlogCards(filteredBlogs);
+    }
+
+    // 搜索功能（支持新分类）
+    function searchBlogs() {
+      const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
+      const activeCategory = document.querySelector('.category-btn.active').classList[1];
+      
+      let filteredBlogs = blogData;
+      // 先按分类过滤
+      if (activeCategory !== 'all') {
+        filteredBlogs = filteredBlogs.filter(blog => blog.category === activeCategory);
+      }
+      // 再按关键词过滤
+      if (searchInput) {
+        filteredBlogs = filteredBlogs.filter(blog => 
+          blog.title.toLowerCase().includes(searchInput) || 
+          blog.keywords.toLowerCase().includes(searchInput) ||
+          blog.excerpt.toLowerCase().includes(searchInput)
+        );
+      }
+      renderBlogCards(filteredBlogs);
+    }
+
+    // 回车键搜索
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        searchBlogs();
+      }
+    });
+
+    // 初始渲染所有博客
+    renderBlogCards(blogData);
+  </script>
+</body>
+</html>
