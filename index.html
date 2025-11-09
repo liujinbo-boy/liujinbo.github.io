@@ -1276,7 +1276,7 @@
   <!-- 引入代码高亮库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script>
-    // 初始化代码高亮
+      // 初始化代码高亮
     hljs.highlightAll();
 
     // 全局变量：当前图片画廊索引
@@ -1870,5 +1870,17 @@
       }
     });
 
-    // 日期格式化函数（新增）
-    function formatDate(dateStr)
+    // 日期格式化函数（补全完整功能）
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // 页面加载完成后渲染所有博客卡片（关键新增）
+    window.addEventListener('load', function() {
+      renderBlogCards(blogData);
+    });
+  </script>
