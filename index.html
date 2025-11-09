@@ -1249,7 +1249,7 @@
   <!-- 引入代码高亮库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script>
-    // 初始化代码高亮
+       // 初始化代码高亮
     hljs.highlightAll();
 
     // 全局变量：当前图片画廊索引
@@ -1524,9 +1524,10 @@ const categoryColorMap = {
         // 平滑滚动
         a.addEventListener('click', function(e) {
           e.preventDefault();
-          document.getElementById(heading.id).scrollIntoView({
-            behavior: 'smooth'
-          });
+          const target = document.getElementById(heading.id);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
         });
         
         li.appendChild(a);
@@ -1546,7 +1547,7 @@ const categoryColorMap = {
           
           const offsetTop = element.offsetTop - 30; // 偏移量
           const nextOffsetTop = index < currentBlogHeadings.length - 1 
-            ? document.getElementById(currentBlogHeadings[index + 1].id).offsetTop - 30
+            ? (document.getElementById(currentBlogHeadings[index + 1].id)?.offsetTop || Infinity) - 30
             : Infinity;
           
           return scrollTop >= offsetTop && scrollTop < nextOffsetTop;
@@ -1563,40 +1564,52 @@ const categoryColorMap = {
       });
     }
 
-    // 解析MD内容，提取标题（核心新增）
+    // 解析MD内容，提取标题（核心优化：兼容特殊格式标题）
     function parseHeadingsFromMd(markdownContent) {
       const headings = [];
       let headingId = 1;
       
-      // 匹配MD中的标题（# 到 ######）
-      const headingRegex = /^(#{1,6})\s+(.*?)$/gm;
+      // 优化正则：兼容标题前后可能的空格、换行，以及标题内包含特殊字符的情况
+      const headingRegex = /^\s*#{1,6}\s+(.*?)\s*$/gm;
       let match;
       
-      while ((match = headingRegex.exec(markdownContent)) !== null) {
-        const level = match[1].length;
-        const text = match[2].trim();
-        const id = `heading-${headingId++}`;
-        
-        headings.push({ level, text, id });
+      try {
+        while ((match = headingRegex.exec(markdownContent)) !== null) {
+          const level = match[0].trim().split(/\s+/)[0].length; // 从匹配结果中提取#的数量
+          const text = match[1].trim();
+          const id = `heading-${headingId++}`;
+          
+          headings.push({ level, text, id });
+        }
+        console.log('标题解析成功：', headings);
+      } catch (error) {
+        console.error('标题解析失败：', error);
       }
       
       return headings;
     }
 
-    // 替换MD内容中的标题，添加ID（核心新增）
+    // 替换MD内容中的标题，添加ID（核心优化：容错处理）
     function addIdsToHeadings(markdownContent, headings) {
       let modifiedMd = markdownContent;
       
-      headings.forEach(heading => {
-        const headingMark = '#'.repeat(heading.level);
-        const regex = new RegExp(`^${headingMark}\\s+${heading.text}$`, 'gm');
-        modifiedMd = modifiedMd.replace(regex, `${headingMark} <span id="${heading.id}">${heading.text}</span>`);
-      });
+      try {
+        headings.forEach(heading => {
+          const headingMark = '#'.repeat(heading.level);
+          // 兼容标题前后的空格
+          const regex = new RegExp(`^\\s*${headingMark}\\s+${heading.text}\\s*$`, 'gm');
+          modifiedMd = modifiedMd.replace(regex, `${headingMark} <span id="${heading.id}">${heading.text}</span>`);
+        });
+      } catch (error) {
+        console.error('添加标题ID失败：', error);
+        // 失败时返回原内容，不影响正文显示
+        return markdownContent;
+      }
       
       return modifiedMd;
     }
 
-    // 打开博客详情弹窗（核心优化：添加目录功能）
+    // 打开博客详情弹窗（核心优化：增加错误排查和兜底）
     function openBlogModal(elem) {
       const blogIndex = elem.getAttribute('data-blog-index');
       const blog = blogData[blogIndex];
@@ -1605,7 +1618,7 @@ const categoryColorMap = {
       const modalCategory = document.getElementById('blogModalCategory');
       const modalTitle = document.getElementById('blogModalTitle');
       const modalCategoryText = document.getElementById('blogModalCategoryText');
-      const modalDate = document.getElementById('blogModalDate'); // 新增日期显示
+      const modalDate = document.getElementById('blogModalDate');
       const modalBody = document.getElementById('blogModalBody');
       
       // 设置分类标签颜色和文本
@@ -1613,7 +1626,7 @@ const categoryColorMap = {
       modalCategory.style.backgroundColor = categoryColorMap[blog.category];
       modalTitle.textContent = blog.title;
       modalCategoryText.textContent = categoryTextMap[blog.category];
-      modalDate.textContent = formatDate(blog.date); // 格式化日期显示
+      modalDate.textContent = formatDate(blog.date);
       
       // 显示加载状态
       modalBody.innerHTML = `
@@ -1625,55 +1638,79 @@ const categoryColorMap = {
       
       // 显示弹窗
       document.getElementById('blogModal').classList.add('blog-modal-active');
-      document.body.style.overflow = 'hidden'; // 禁止页面滚动
+      document.body.style.overflow = 'hidden';
       
-      // 加载并解析MD文件
+      // 加载并解析MD文件（增加详细日志）
       fetch(blog.markdown)
         .then(response => {
+          console.log('请求状态：', response.status, response.statusText);
+          console.log('请求URL：', blog.markdown);
           if (!response.ok) {
-            throw new Error('文件加载失败');
+            throw new Error(`HTTP错误，状态码：${response.status}`);
           }
           return response.text();
         })
         .then(markdownContent => {
-          // 1. 提取标题，生成目录数据
+          console.log('MD文件加载成功，内容长度：', markdownContent.length);
+          
+          // 1. 提取标题（容错：解析失败也继续）
           const headings = parseHeadingsFromMd(markdownContent);
           
-          // 2. 为MD中的标题添加ID，用于锚点跳转
+          // 2. 为标题添加ID（容错）
           const modifiedMd = addIdsToHeadings(markdownContent, headings);
           
-          // 3. 解析MD为HTML
-          const htmlContent = marked.parse(modifiedMd);
+          // 3. 解析MD为HTML（增加异常捕获）
+          let htmlContent = '';
+          try {
+            htmlContent = marked.parse(modifiedMd);
+            console.log('MD解析为HTML成功');
+          } catch (parseError) {
+            console.error('MD解析失败：', parseError);
+            // 解析失败时直接显示原始文本（格式化处理）
+            htmlContent = `<pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">${markdownContent}</pre>`;
+          }
+          
+          // 4. 渲染正文
           modalBody.innerHTML = htmlContent;
           
-          // 4. 生成目录
-          generateToc(headings);
+          // 5. 生成目录（即使失败也不影响正文）
+          try {
+            generateToc(headings);
+            setupScrollSpy();
+          } catch (tocError) {
+            console.error('目录生成失败：', tocError);
+            document.getElementById('tocList').innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">目录生成失败</a></li>';
+          }
           
-          // 5. 设置滚动监听，更新当前目录项
-          setupScrollSpy();
-          
-          // 6. 代码高亮
-          hljs.highlightAll();
+          // 6. 代码高亮（增加异常捕获）
+          try {
+            hljs.highlightAll();
+            console.log('代码高亮成功');
+          } catch (highlightError) {
+            console.error('代码高亮失败：', highlightError);
+            // 高亮失败不影响正文显示
+          }
         })
         .catch(error => {
-          // 显示错误状态
+          // 显示详细错误信息
           modalBody.innerHTML = `
             <div class="blog-modal-error">
               <i class="fas fa-exclamation-circle"></i>
               <p>博客加载失败</p>
-              <p style="margin-top: 8px; font-size: 14px;">可能是文件路径错误或网络问题</p>
+              <p style="margin-top: 8px; font-size: 14px; color: #ff4d4f;">错误详情：${error.message}</p>
+              <p style="margin-top: 8px; font-size: 13px; color: #999;">文件路径：${blog.markdown}</p>
               <button onclick="reloadBlogModal(${blogIndex})">重试</button>
             </div>
           `;
-          console.error('MD文件加载失败：', error);
+          console.error('MD文件加载全流程失败：', error);
         });
     }
 
     // 关闭博客详情弹窗（核心优化）
     function closeBlogModal() {
       document.getElementById('blogModal').classList.remove('blog-modal-active');
-      document.body.style.overflow = 'auto'; // 恢复页面滚动
-      currentBlogHeadings = []; // 清空标题列表
+      document.body.style.overflow = 'auto';
+      currentBlogHeadings = [];
     }
 
     // 重试加载博客（核心新增）
@@ -1681,7 +1718,6 @@ const categoryColorMap = {
       const blog = blogData[blogIndex];
       const modalBody = document.getElementById('blogModalBody');
       
-      // 重新显示加载状态
       modalBody.innerHTML = `
         <div class="blog-modal-loading">
           <i class="fas fa-spinner"></i>
@@ -1689,31 +1725,47 @@ const categoryColorMap = {
         </div>
       `;
       
-      // 重新加载并解析MD文件
       fetch(blog.markdown)
         .then(response => {
           if (!response.ok) {
-            throw new Error('文件加载失败');
+            throw new Error(`HTTP错误，状态码：${response.status}`);
           }
           return response.text();
         })
         .then(markdownContent => {
-          // 提取标题、添加ID、解析HTML
           const headings = parseHeadingsFromMd(markdownContent);
           const modifiedMd = addIdsToHeadings(markdownContent, headings);
-          const htmlContent = marked.parse(modifiedMd);
+          
+          let htmlContent = '';
+          try {
+            htmlContent = marked.parse(modifiedMd);
+          } catch (parseError) {
+            console.error('重试时MD解析失败：', parseError);
+            htmlContent = `<pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">${markdownContent}</pre>`;
+          }
           
           modalBody.innerHTML = htmlContent;
-          generateToc(headings);
-          setupScrollSpy();
-          hljs.highlightAll();
+          
+          try {
+            generateToc(headings);
+            setupScrollSpy();
+          } catch (tocError) {
+            document.getElementById('tocList').innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">目录生成失败</a></li>';
+          }
+          
+          try {
+            hljs.highlightAll();
+          } catch (highlightError) {
+            console.error('重试时代码高亮失败：', highlightError);
+          }
         })
         .catch(error => {
           modalBody.innerHTML = `
             <div class="blog-modal-error">
               <i class="fas fa-exclamation-circle"></i>
               <p>仍然加载失败</p>
-              <p style="margin-top: 8px; font-size: 14px;">请检查MD文件路径是否正确</p>
+              <p style="margin-top: 8px; font-size: 14px; color: #ff4d4f;">错误详情：${error.message}</p>
+              <p style="margin-top: 8px; font-size: 13px; color: #999;">文件路径：${blog.markdown}</p>
               <button onclick="reloadBlogModal(${blogIndex})">再次重试</button>
             </div>
           `;
@@ -1778,7 +1830,6 @@ const categoryColorMap = {
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}年${month}月${day}日`;
     }
-
     // 初始渲染所有博客
     renderBlogCards(blogData);
   </script>
