@@ -1116,22 +1116,20 @@
     // 分类文本映射（用于博客详情弹窗）- 新增环境搭建映射
     const categoryTextMap = {
       video: '音视频内容',
-      env: '环境搭建' 
+      env: '环境搭建',
       note: '学习笔记',
       essay: '随笔感悟',
       life: '生活记录',
     };
 
-    // 分类颜色映射（用于博客详情弹窗）- 新增环境搭建映射
-    const categoryColorMap = {
-      video: 'var(--category-video)',
-      essay: 'var(--category-essay)',
-      note: 'var(--category-note)',
-      life: 'var(--category-life)',
-      env: 'var(--category-env)' // 新增
-    };
-
-    // 博客数据（完整配置）- 新增环境搭建分类的示例博客
+    // 分类颜色映射（用于博客详情弹窗）
+const categoryColorMap = {
+  video: '#165DFF',
+  env: '#27AE60',
+  note: '#F7BA1E',
+  essay: '#722ED1',
+  life: '#36CFC9',
+};
     const blogData = [
       {
         title: "sip协议中的NAT穿透研究",
@@ -1145,8 +1143,8 @@
       },
       {
         title: "惠州植物园随拍",
-        excerpt: "",
-        cover: "good_time/picture/plant2.jpg", // 封面图（显示在卡片上）
+        excerpt: "周末闲暇时光，打卡惠州植物园",
+        cover: "good_time/picture/plant2.jpg", // 封面图
         images: [ // 图片类博客：多张图片路径数组
           "good_time/picture/plant2.jpg",
           "good_time/picture/plant1.jpg",
@@ -1160,20 +1158,20 @@
       },
       {
         title: "网络编程学习笔记",
-        excerpt: "底层socket套接字接口的介绍和使用",
+        excerpt: "底层socket套接字接口的介绍和使用，包括TCP/UDP通信、并发处理等核心知识点",
         cover: "", // 无图
         markdown: "note/网络编程.md",
-        keywords: "网络编程,笔记",
+        keywords: "网络编程,笔记,socket,TCP,UDP",
         category: "note",
         isImageGallery: false,
         date: "2025-10-30" 
       },
       {
         title: "linux系统编程学习笔记",
-        excerpt: "入门linux应用开发的笔记",
+        excerpt: "入门linux应用开发的笔记，涵盖文件IO、进程管理、线程同步、信号处理等内容",
         cover: "", // 无图
         markdown: "note/linux系统编程.md",
-        keywords: "笔记",
+        keywords: "linux,系统编程,笔记,进程,线程",
         category: "note",
         isImageGallery: false, 
         date: "2025-10-30" 
@@ -1187,7 +1185,7 @@
         category: "env",
         isImageGallery: false,
         date: "2025-10-22"
-      }
+      },
     ];
 
     // 生成博客卡片（适配普通博客/图片类博客
