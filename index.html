@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>嵌入式Linux探索者 | 个人博客</title>
+  <title>欢迎家访 | 个人博客</title>
   <!-- 引入Font Awesome图标 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- 引入代码高亮样式 -->
@@ -25,6 +25,7 @@
       --category-essay: #722ED1;    /* 随笔：温柔紫 */
       --category-note: #F7BA1E;     /* 学习笔记：暖黄 */
       --category-life: #36CFC9;     /* 生活记录：青绿 */
+      --category-env: #27AE60;      /* 环境搭建：森林绿（新增） */
       --category-all: #86909C;      /* 全部：浅灰 */
       --gallery-mask: rgba(0, 0, 0, 0.85); /* 图片画廊遮罩色 */
       --blog-modal-mask: rgba(0, 0, 0, 0.7); /* 博客详情遮罩色 */
@@ -275,6 +276,9 @@
     .category-btn.life {
       background: linear-gradient(135deg, var(--category-life), #2ba8a2);
     }
+    .category-btn.env { /* 新增环境搭建分类按钮样式 */
+      background: linear-gradient(135deg, var(--category-env), #1e8449);
+    }
 
     /* hover/active效果强化 */
     .category-btn:hover {
@@ -355,6 +359,9 @@
     .work-img-placeholder.life {
       background: linear-gradient(135deg, var(--category-life), #2ba8a2);
     }
+    .work-img-placeholder.env { /* 新增环境搭建分类占位区样式 */
+      background: linear-gradient(135deg, var(--category-env), #1e8449);
+    }
 
     .work-img-placeholder i {
       font-size: 36px;
@@ -401,6 +408,9 @@
     }
     .work-category.life {
       background-color: var(--category-life);
+    }
+    .work-category.env { /* 新增环境搭建分类标签样式 */
+      background-color: var(--category-env);
     }
 
     /* 图片类博客标识 */
@@ -958,7 +968,7 @@
   <div class="container">
     <!-- 导航栏 -->
     <nav class="navbar">
-      <div class="logo">嵌入式Linux探索者</div>
+      <div class="logo">bobo的快乐妙妙屋</div>
     </nav>
 
     <!-- 个人介绍区域 -->
@@ -997,10 +1007,10 @@
           <a href="mailto:liujinbo1234@qq.com" target="_blank" class="contact-item">
             <i class="fas fa-envelope" style="color: #1a73e8;"></i> liujinbo1234@qq.com
           </a>
-          <a href="https://qzone.qq.com/3225933788" target="_blank" class="contact-item">
+          <a  target="_blank" class="contact-item">
             <i class="fab fa-qq" style="color: #1a73e8;"></i> 3225933788
           </a>
-          <a href="https://weixin.qq.com/" target="_blank" class="contact-item">
+          <a  target="_blank" class="contact-item">
             <i class="fab fa-weixin" style="color: #07c160;"></i> L17752785918
           </a>
         </div>
@@ -1013,12 +1023,12 @@
       <div class="works-header">
         <h2 class="works-title">我的博客作品</h2>
         <div class="blog-search-box">
-          <input type="text" id="searchInput" placeholder="搜索关键词（如：驱动开发、生活）...">
+          <input type="text" id="searchInput" placeholder="搜索关键词（如：驱动开发、环境搭建、生活）...">
           <button onclick="searchBlogs()"><i class="fas fa-search"></i></button>
         </div>
       </div>
 
-      <!-- 美化分类按钮（更新为你的4个分类+全部） -->
+      <!-- 美化分类按钮（更新为你的5个分类+全部） -->
       <div class="category-buttons">
         <button class="category-btn all active" onclick="filterByCategory('all')">
           <i class="fas fa-th"></i> 全部
@@ -1026,15 +1036,19 @@
         <button class="category-btn video" onclick="filterByCategory('video')">
           <i class="fas fa-video"></i> 音视频
         </button>
-        <button class="category-btn essay" onclick="filterByCategory('essay')">
-          <i class="fas fa-pen-fancy"></i> 随笔
+        <button class="category-btn env" onclick="filterByCategory('env')"> 
+          <i class="fas fa-tools"></i> 环境搭建
         </button>
         <button class="category-btn note" onclick="filterByCategory('note')">
           <i class="fas fa-book-open"></i> 学习笔记
         </button>
+        <button class="category-btn essay" onclick="filterByCategory('essay')">
+          <i class="fas fa-pen-fancy"></i> 随笔
+        </button>
         <button class="category-btn life" onclick="filterByCategory('life')">
           <i class="fas fa-camera-retro"></i> 生活记录
         </button>
+
       </div>
 
       <!-- 博客列表 -->
@@ -1073,7 +1087,7 @@
         <span class="blog-modal-category" id="blogModalCategory"></span>
         <h2 class="blog-modal-title" id="blogModalTitle"></h2>
         <div class="blog-modal-meta">
-          <span><i class="far fa-calendar-alt"></i> 2025年</span>
+          <span><i class="far fa-calendar-alt"></i> <span id="blogModalDate"></span></span>
           <span><i class="far fa-folder"></i> <span id="blogModalCategoryText"></span></span>
         </div>
       </div>
@@ -1099,23 +1113,25 @@
     let currentGalleryIndex = 0;
     let currentGalleryImages = [];
 
-    // 分类文本映射（用于博客详情弹窗）
+    // 分类文本映射（用于博客详情弹窗）- 新增环境搭建映射
     const categoryTextMap = {
       video: '音视频内容',
-      essay: '随笔感悟',
+      env: '环境搭建' 
       note: '学习笔记',
-      life: '生活记录'
+      essay: '随笔感悟',
+      life: '生活记录',
     };
 
-    // 分类颜色映射（用于博客详情弹窗）
+    // 分类颜色映射（用于博客详情弹窗）- 新增环境搭建映射
     const categoryColorMap = {
       video: 'var(--category-video)',
       essay: 'var(--category-essay)',
       note: 'var(--category-note)',
-      life: 'var(--category-life)'
+      life: 'var(--category-life)',
+      env: 'var(--category-env)' // 新增
     };
 
-    // 博客数据（完整配置）
+    // 博客数据（完整配置）- 新增环境搭建分类的示例博客
     const blogData = [
       {
         title: "sip协议中的NAT穿透研究",
@@ -1125,7 +1141,7 @@
         keywords: "音视频,NAT,sip",
         category: "video",
         isImageGallery: false, // 普通文字博客
-        date: "2025-10-30" // 新增日期字段
+        date: "2025-10-30" // 日期字段
       },
       {
         title: "惠州植物园随拍",
@@ -1141,10 +1157,40 @@
         category: "life",
         isImageGallery: true, // 标记为图片类博客
         date: "2025-11-02"
+      },
+      {
+        title: "网络编程学习笔记",
+        excerpt: "底层socket套接字接口的介绍和使用",
+        cover: "", // 无图
+        markdown: "note/网络编程.md",
+        keywords: "网络编程,笔记",
+        category: "note",
+        isImageGallery: false,
+        date: "2025-10-30" 
+      },
+      {
+        title: "linux系统编程学习笔记",
+        excerpt: "入门linux应用开发的笔记",
+        cover: "", // 无图
+        markdown: "note/linux系统编程.md",
+        keywords: "笔记",
+        category: "note",
+        isImageGallery: false, 
+        date: "2025-10-30" 
+      },
+      {
+        title: "服务器环境配置笔记",
+        excerpt: "详细介绍嵌入式Linux开发环境的完整搭建流程，包括交叉编译、samba服务、调试工具等",
+        cover: "", 
+        markdown: "note/服务器环境配置.md",
+        keywords: "环境搭建,Ubuntu,嵌入式开发,交叉编译,samba",
+        category: "env",
+        isImageGallery: false,
+        date: "2025-10-22"
       }
     ];
 
-    // 生成博客卡片（适配普通博客/图片类博客）
+    // 生成博客卡片（适配普通博客/图片类博客
     function renderBlogCards(blogs) {
       const worksList = document.getElementById('worksList');
       worksList.innerHTML = '';
@@ -1164,12 +1210,13 @@
         const card = document.createElement('div');
         card.className = 'work-card';
         
-        // 分类对应的图标（用于无图占位区）
+        // 分类对应的图标（用于无图占位区）- 新增环境搭建图标
         const categoryIconMap = {
           video: 'fas fa-video',
           essay: 'fas fa-pen-fancy',
           note: 'fas fa-book-open',
-          life: 'fas fa-camera-retro'
+          life: 'fas fa-camera-retro',
+          env: 'fas fa-tools' // 新增环境搭建图标
         };
 
         // 动态生成卡片内容（区分普通博客/图片类博客）
@@ -1185,7 +1232,7 @@
                 ${blog.isImageGallery ? '<span class="image-gallery-tag"><i class="fas fa-images"></i> 多图</span>' : ''}
               </h3>
               <p class="work-excerpt">${blog.excerpt}</p>
-              ${blog.isImageGallery ? '' : '<div class="work-link" onclick="openBlogModal(this)" data-blog-index="' + blogs.indexOf(blog) + '">阅读全文 <i class="fas fa-arrow-right"></i></div>'}
+              ${blog.isImageGallery ? '' : '<div class="work-link" onclick="openBlogModal(this)" data-blog-index="' + blogData.indexOf(blog) + '">阅读全文 <i class="fas fa-arrow-right"></i></div>'}
             </div>
           `;
         } else {
@@ -1199,7 +1246,7 @@
               <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
               <h3 class="work-title">${blog.title}</h3>
               <p class="work-excerpt">${blog.excerpt}</p>
-              <div class="work-link" onclick="openBlogModal(this)" data-blog-index="${blogs.indexOf(blog)}">阅读全文 <i class="fas fa-arrow-right"></i></div>
+              <div class="work-link" onclick="openBlogModal(this)" data-blog-index="${blogData.indexOf(blog)}">阅读全文 <i class="fas fa-arrow-right"></i></div>
             </div>
           `;
         }
@@ -1345,6 +1392,7 @@
       const modalCategory = document.getElementById('blogModalCategory');
       const modalTitle = document.getElementById('blogModalTitle');
       const modalCategoryText = document.getElementById('blogModalCategoryText');
+      const modalDate = document.getElementById('blogModalDate'); // 新增日期显示
       const modalBody = document.getElementById('blogModalBody');
       
       // 设置分类标签颜色和文本
@@ -1352,6 +1400,7 @@
       modalCategory.style.backgroundColor = categoryColorMap[blog.category];
       modalTitle.textContent = blog.title;
       modalCategoryText.textContent = categoryTextMap[blog.category];
+      modalDate.textContent = formatDate(blog.date); // 格式化日期显示
       
       // 显示加载状态
       modalBody.innerHTML = `
@@ -1440,13 +1489,6 @@
         });
     }
 
-    // 点击遮罩关闭博客弹窗
-    document.getElementById('blogModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeBlogModal();
-      }
-    });
-
     // 分类过滤功能
     function filterByCategory(category) {
       // 更新按钮激活状态
@@ -1495,6 +1537,15 @@
         updateGallerySlide();
       }
     });
+
+    // 日期格式化函数（新增）
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}年${month}月${day}日`;
+    }
 
     // 初始渲染所有博客
     renderBlogCards(blogData);
