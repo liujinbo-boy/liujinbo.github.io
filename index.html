@@ -29,7 +29,8 @@
       --category-all: #86909C;      /* 全部：浅灰 */
       --gallery-mask: rgba(0, 0, 0, 0.85); /* 图片画廊遮罩色 */
       --blog-modal-mask: rgba(0, 0, 0, 0.7); /* 博客详情遮罩色 */
-      --toc-bg: #fafafa; /* 目录背景色 */
+      --toc-bg: #F9FAFB; /* 目录背景色 */
+      --toc-hover: rgba(22, 93, 255, 0.05); /* 目录hover色 */
       --toc-active: #165DFF; /* 目录激活色 */
     }
 
@@ -584,7 +585,7 @@
       height: 100%;
     }
 
-    /* 博客详情弹窗（核心新增：解析MD） */
+    /* 博客详情弹窗（核心优化：左侧目录+固定关闭按钮+内容不溢出） */
     .blog-modal {
       position: fixed;
       top: 0;
@@ -613,19 +614,22 @@
       padding: 30px;
       position: relative;
       margin-bottom: 40px;
-      display: flex; /* 改为弹性布局 */
+      display: flex;
       gap: 25px;
+      /* 关键：设置最大高度和溢出隐藏，确保整体不超出屏幕 */
+      max-height: calc(100vh - 80px);
+      overflow: hidden;
     }
 
-    /* 固定位置的关闭按钮 */
+    /* 固定关闭按钮 - 始终显示在右上角 */
     .blog-modal-close {
-      position: fixed; /* 改为固定定位 */
+      position: fixed; /* 改为fixed定位，相对于视口 */
       top: 20px;
       right: 20px;
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: rgba(0,0,0,0.7);
+      background-color: rgba(0,0,0,0.1);
       color: white;
       border: none;
       font-size: 18px;
@@ -635,26 +639,24 @@
       align-items: center;
       justify-content: center;
       z-index: 10000; /* 确保在最上层 */
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .blog-modal-close:hover {
-      background-color: rgba(0,0,0,0.9);
+      background-color: rgba(0,0,0,0.2);
       transform: scale(1.05);
     }
 
-    /* 目录栏样式 */
-    .blog-toc {
+    /* 左侧目录区域 */
+    .blog-modal-toc {
       width: 260px;
-      flex-shrink: 0;
+      min-width: 260px;
       background-color: var(--toc-bg);
       border-radius: 8px;
       padding: 20px;
-      height: calc(100vh - 120px); /* 固定高度 */
-      position: sticky;
-      top: 30px;
-      overflow-y: auto;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow-y: auto; /* 目录超出时可滚动 */
+      max-height: calc(100vh - 140px); /* 限制目录高度 */
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.02);
     }
 
     .toc-title {
@@ -665,8 +667,10 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #eee;
+    }
+
+    .toc-title i {
+      color: var(--toc-active);
     }
 
     .toc-list {
@@ -674,28 +678,31 @@
     }
 
     .toc-item {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .toc-link {
-      text-decoration: none;
-      color: var(--light-text);
-      font-size: 14px;
       display: block;
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 4px;
+      color: var(--light-text);
+      text-decoration: none;
+      font-size: 14px;
       transition: var(--transition);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .toc-link:hover {
-      color: var(--toc-active);
-      background-color: rgba(22, 93, 255, 0.05);
+      background-color: var(--toc-hover);
+      color: var(--text-color);
     }
 
     .toc-link.active {
+      background-color: rgba(22, 93, 255, 0.1);
       color: var(--toc-active);
       font-weight: 500;
-      background-color: rgba(22, 93, 255, 0.1);
     }
 
     /* 标题层级缩进 */
@@ -708,37 +715,13 @@
     .toc-level-4 {
       padding-left: 45px;
     }
-    .toc-level-5 {
-      padding-left: 60px;
-    }
-    .toc-level-6 {
-      padding-left: 75px;
-    }
 
-    /* 博客内容区域 - 核心修改：添加滚动容器 */
-    .blog-content-wrapper {
+    /* 右侧内容区域 - 核心优化：确保不溢出 */
+    .blog-modal-main {
       flex: 1;
-      padding-bottom: 30px;
-      max-height: calc(100vh - 120px); /* 固定最大高度，与目录栏一致 */
-      overflow-y: auto; /* 内容溢出时显示滚动条 */
-      scroll-behavior: smooth; /* 平滑滚动 */
-      padding-right: 10px; /* 给滚动条留空间 */
-    }
-
-    /* 滚动条美化 */
-    .blog-content-wrapper::-webkit-scrollbar {
-      width: 6px;
-    }
-    .blog-content-wrapper::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
-    }
-    .blog-content-wrapper::-webkit-scrollbar-thumb {
-      background: #ccc;
-      border-radius: 3px;
-    }
-    .blog-content-wrapper::-webkit-scrollbar-thumb:hover {
-      background: #999;
+      overflow-y: auto; /* 内容超出时可滚动 */
+      padding-right: 10px; /* 预留滚动条空间 */
+      max-height: calc(100vh - 140px); /* 限制内容高度，确保不超出屏幕 */
     }
 
     .blog-modal-header {
@@ -776,13 +759,17 @@
       margin-right: 4px;
     }
 
-    /* MD解析后的内容样式（美化） */
+    /* MD解析后的内容样式（美化+不溢出） */
     .blog-modal-body {
       color: var(--text-color);
       line-height: 1.8;
       font-size: 16px;
+      /* 关键：确保内容不会超出容器 */
+      width: 100%;
+      overflow-x: auto; /* 处理代码块等宽内容 */
     }
 
+    /* 为所有标题添加ID，用于锚点跳转 */
     .blog-modal-body h1,
     .blog-modal-body h2,
     .blog-modal-body h3,
@@ -792,7 +779,7 @@
       margin: 25px 0 15px;
       color: var(--text-color);
       font-weight: 600;
-      scroll-margin-top: 20px; /* 滚动偏移量，适配内容区域滚动 */
+      scroll-margin-top: 20px; /* 锚点跳转偏移量 */
     }
 
     .blog-modal-body h1 {
@@ -820,6 +807,7 @@
       border-radius: 8px;
       margin: 20px 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: block; /* 防止图片底部留白 */
     }
 
     .blog-modal-body a {
@@ -865,7 +853,7 @@
       border-radius: 8px;
       padding: 15px;
       margin: 20px 0;
-      overflow-x: auto;
+      overflow-x: auto; /* 代码块横向滚动 */
       border: 1px solid #eee;
     }
 
@@ -875,10 +863,16 @@
       font-size: 14px;
     }
 
-    .blog-modal-loading {
+    /* 加载和错误状态容器 - 确保居中 */
+    .blog-modal-loading, .blog-modal-error {
       text-align: center;
       padding: 60px 20px;
       color: var(--light-text);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .blog-modal-loading i {
@@ -891,12 +885,6 @@
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
-    }
-
-    .blog-modal-error {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--light-text);
     }
 
     .blog-modal-error i {
@@ -930,22 +918,22 @@
       font-size: 14px;
     }
 
-    /* 响应式适配 */
-    @media (max-width: 1024px) {
+    /* 响应式适配 - 移动端隐藏目录 */
+    @media (max-width: 992px) {
       .blog-modal-content {
-        flex-direction: column; /* 移动端垂直布局 */
+        flex-direction: column;
         gap: 20px;
+        max-height: calc(100vh - 60px);
       }
 
-      .blog-toc {
+      .blog-modal-toc {
         width: 100%;
-        height: auto;
-        max-height: 200px;
-        position: static;
+        min-width: auto;
+        max-height: 200px; /* 移动端目录高度限制 */
       }
 
-      .blog-content-wrapper {
-        max-height: calc(100vh - 200px); /* 移动端调整高度 */
+      .blog-modal-main {
+        max-height: calc(100vh - 320px);
       }
     }
 
@@ -1066,10 +1054,6 @@
         width: 36px;
         height: 36px;
       }
-
-      .blog-content-wrapper {
-        max-height: calc(100vh - 150px);
-      }
     }
 
     @media (max-width: 480px) {
@@ -1098,21 +1082,13 @@
         height: 60vh;
       }
 
-      /* 移动端目录适配 */
-      .blog-toc {
-        padding: 15px;
+      /* 移动端隐藏目录（空间不足时） */
+      .blog-modal-toc {
+        display: none;
       }
 
-      .toc-title {
-        font-size: 15px;
-      }
-
-      .toc-link {
-        font-size: 13px;
-      }
-
-      .blog-content-wrapper {
-        max-height: calc(100vh - 120px);
+      .blog-modal-main {
+        max-height: calc(100vh - 140px);
       }
     }
   </style>
@@ -1232,24 +1208,21 @@
     </div>
   </div>
 
-  <!-- 博客详情弹窗（核心新增：解析MD） -->
+  <!-- 博客详情弹窗（核心优化：左侧目录+固定关闭按钮） -->
   <div class="blog-modal" id="blogModal">
     <div class="blog-modal-content">
-      <!-- 左侧目录栏 -->
-      <div class="blog-toc" id="blogToc">
+      <!-- 左侧目录区域 -->
+      <div class="blog-modal-toc" id="blogModalToc">
         <div class="toc-title">
           <i class="fas fa-list"></i> 文章目录
         </div>
         <ul class="toc-list" id="tocList">
           <!-- 目录将动态生成 -->
-          <li style="text-align: center; padding: 20px 0; color: var(--light-text); font-size: 14px;">
-            加载中...
-          </li>
         </ul>
       </div>
 
       <!-- 右侧内容区域 -->
-      <div class="blog-content-wrapper" id="blogContentWrapper">
+      <div class="blog-modal-main">
         <div class="blog-modal-header">
           <span class="blog-modal-category" id="blogModalCategory"></span>
           <h2 class="blog-modal-title" id="blogModalTitle"></h2>
@@ -1267,7 +1240,7 @@
         </div>
       </div>
     </div>
-    <!-- 固定位置的关闭按钮 -->
+    <!-- 固定关闭按钮（移到外面，确保始终可见） -->
     <button class="blog-modal-close" onclick="closeBlogModal()"><i class="fas fa-times"></i></button>
   </div>
 
@@ -1276,14 +1249,13 @@
   <!-- 引入代码高亮库 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script>
-      // 初始化代码高亮
+    // 初始化代码高亮
     hljs.highlightAll();
 
     // 全局变量：当前图片画廊索引
     let currentGalleryIndex = 0;
     let currentGalleryImages = [];
-    let currentBlogHeadings = []; // 存储当前博客的标题信息
-    let scrollListener = null; // 存储滚动监听函数引用，用于移除
+    let currentBlogHeadings = []; // 存储当前博客的标题列表
 
     // 分类文本映射（用于博客详情弹窗）- 新增环境搭建映射
     const categoryTextMap = {
@@ -1295,14 +1267,13 @@
     };
 
     // 分类颜色映射（用于博客详情弹窗）
-    const categoryColorMap = {
-      video: '#165DFF',
-      env: '#27AE60',
-      note: '#F7BA1E',
-      essay: '#722ED1',
-      life: '#36CFC9',
-    };
-    
+const categoryColorMap = {
+  video: '#165DFF',
+  env: '#27AE60',
+  note: '#F7BA1E',
+  essay: '#722ED1',
+  life: '#36CFC9',
+};
     const blogData = [
       {
         title: "sip协议中的NAT穿透研究",
@@ -1530,159 +1501,102 @@
       }
     });
 
-    // 键盘控制画廊（核心功能）
-    document.addEventListener('keydown', function(e) {
-      const isGalleryActive = document.getElementById('imageGallery').classList.contains('gallery-active');
-      const isBlogModalActive = document.getElementById('blogModal').classList.contains('blog-modal-active');
-      
-      if (isGalleryActive && !isBlogModalActive) {
-        switch(e.key) {
-          case 'ArrowLeft':
-            prevSlide();
-            break;
-          case 'ArrowRight':
-            nextSlide();
-            break;
-          case 'Escape':
-            closeGallery();
-            break;
-        }
-      } else if (isBlogModalActive && !isGalleryActive) {
-        if (e.key === 'Escape') {
-          closeBlogModal();
-        }
-      }
-    });
-
     // 生成文章目录（核心新增）
-    function generateTableOfContents(htmlContent) {
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlContent;
-      currentBlogHeadings = [];
-      
-      // 获取所有标题（h1-h6）
-      const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      
+    function generateToc(headings) {
+      const tocList = document.getElementById('tocList');
+      tocList.innerHTML = '';
+      currentBlogHeadings = headings;
+
       if (headings.length === 0) {
-        return '<li style="text-align: center; padding: 20px 0; color: var(--light-text); font-size: 14px;">无目录</li>';
+        tocList.innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">无目录结构</a></li>';
+        return;
       }
-      
-      // 生成标题数据
-      headings.forEach((heading, index) => {
-        const level = parseInt(heading.tagName.replace('H', ''));
-        const id = `heading-${index}`;
-        heading.id = id; // 给标题添加id用于锚点跳转
+
+      headings.forEach(heading => {
+        const li = document.createElement('li');
+        li.className = `toc-item toc-level-${heading.level}`;
         
-        currentBlogHeadings.push({
-          id,
-          text: heading.textContent.trim(),
-          level
+        const a = document.createElement('a');
+        a.className = 'toc-link';
+        a.href = `#${heading.id}`;
+        a.textContent = heading.text;
+        
+        // 平滑滚动
+        a.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById(heading.id).scrollIntoView({
+            behavior: 'smooth'
+          });
         });
+        
+        li.appendChild(a);
+        tocList.appendChild(li);
       });
-      
-      // 生成目录HTML
-      let tocHtml = '';
-      let currentLevel = 1;
-      
-      currentBlogHeadings.forEach(heading => {
-        const { id, text, level } = heading;
-        
-        // 处理层级关系
-        if (level > currentLevel) {
-          // 向下嵌套
-          tocHtml += '<ul class="toc-list">';
-        } else if (level < currentLevel) {
-          // 向上闭合
-          tocHtml += '</li>' + '</ul>'.repeat(currentLevel - level) + '</li>';
-        } else if (tocHtml) {
-          // 同层级，闭合上一个
-          tocHtml += '</li>';
-        }
-        
-        // 添加当前标题
-        tocHtml += `<li class="toc-item"><a href="#${id}" class="toc-link toc-level-${level}" onclick="scrollToHeading(event, '${id}')">${text}</a>`;
-        
-        currentLevel = level;
-      });
-      
-      // 闭合所有未闭合的标签
-      tocHtml += '</li>' + '</ul>'.repeat(currentLevel - 1);
-      
-      return tocHtml;
     }
 
-    // 滚动到指定标题（核心修改：改为在内容区域内滚动）
-    function scrollToHeading(e, headingId) {
-      e.preventDefault(); // 阻止默认锚点跳转
+    // 监听滚动，更新当前激活的目录项（核心新增）
+    function setupScrollSpy() {
+      const blogBody = document.getElementById('blogModalBody');
       
-      const contentWrapper = document.getElementById('blogContentWrapper');
-      const heading = document.getElementById(headingId);
-      
-      if (heading && contentWrapper) {
-        // 计算标题在内容区域内的相对位置
-        const headingTop = heading.offsetTop - contentWrapper.offsetTop;
-        
-        // 在内容区域内平滑滚动
-        contentWrapper.scrollTo({
-          top: headingTop - 20, // 偏移20px，避免标题贴顶
-          behavior: 'smooth'
+      blogBody.addEventListener('scroll', function() {
+        const scrollTop = blogBody.scrollTop;
+        const activeIndex = currentBlogHeadings.findIndex((heading, index) => {
+          const element = document.getElementById(heading.id);
+          if (!element) return false;
+          
+          const offsetTop = element.offsetTop - 30; // 偏移量
+          const nextOffsetTop = index < currentBlogHeadings.length - 1 
+            ? document.getElementById(currentBlogHeadings[index + 1].id).offsetTop - 30
+            : Infinity;
+          
+          return scrollTop >= offsetTop && scrollTop < nextOffsetTop;
         });
         
         // 更新目录激活状态
-        updateActiveTocItem(headingId);
-      }
-    }
-
-    // 更新目录激活状态（核心新增）
-    function updateActiveTocItem(activeId) {
-      const tocLinks = document.querySelectorAll('.toc-link');
-      
-      tocLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href') === `#${activeId}`) {
-          link.classList.add('active');
-        }
+        document.querySelectorAll('.toc-link').forEach((link, index) => {
+          if (index === activeIndex) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
       });
     }
 
-    // 监听滚动，更新当前激活的目录项（核心修改：监听内容区域滚动）
-    function setupScrollListener() {
-      // 先移除之前的监听，避免重复绑定
-      if (scrollListener) {
-        document.getElementById('blogContentWrapper').removeEventListener('scroll', scrollListener);
+    // 解析MD内容，提取标题（核心新增）
+    function parseHeadingsFromMd(markdownContent) {
+      const headings = [];
+      let headingId = 1;
+      
+      // 匹配MD中的标题（# 到 ######）
+      const headingRegex = /^(#{1,6})\s+(.*?)$/gm;
+      let match;
+      
+      while ((match = headingRegex.exec(markdownContent)) !== null) {
+        const level = match[1].length;
+        const text = match[2].trim();
+        const id = `heading-${headingId++}`;
+        
+        headings.push({ level, text, id });
       }
       
-      const contentWrapper = document.getElementById('blogContentWrapper');
-      
-      scrollListener = function() {
-        const scrollPosition = contentWrapper.scrollTop + 40; // 偏移量，提前激活目录
-        let currentActiveId = '';
-        
-        // 找到当前可视区域的标题
-        currentBlogHeadings.forEach((heading, index) => {
-          const headingElement = document.getElementById(heading.id);
-          if (!headingElement) return;
-          
-          const headingTop = headingElement.offsetTop - contentWrapper.offsetTop;
-          const nextHeadingTop = index < currentBlogHeadings.length - 1 
-            ? document.getElementById(currentBlogHeadings[index + 1].id).offsetTop - contentWrapper.offsetTop
-            : Infinity;
-          
-          if (scrollPosition >= headingTop && scrollPosition < nextHeadingTop) {
-            currentActiveId = heading.id;
-          }
-        });
-        
-        if (currentActiveId) {
-          updateActiveTocItem(currentActiveId);
-        }
-      };
-      
-      // 绑定滚动监听
-      contentWrapper.addEventListener('scroll', scrollListener);
+      return headings;
     }
 
-    // 打开博客详情弹窗（核心新增：解析MD）
+    // 替换MD内容中的标题，添加ID（核心新增）
+    function addIdsToHeadings(markdownContent, headings) {
+      let modifiedMd = markdownContent;
+      
+      headings.forEach(heading => {
+        const headingMark = '#'.repeat(heading.level);
+        const regex = new RegExp(`^${headingMark}\\s+${heading.text}$`, 'gm');
+        modifiedMd = modifiedMd.replace(regex, `${headingMark} <span id="${heading.id}">${heading.text}</span>`);
+      });
+      
+      return modifiedMd;
+    }
+
+    // 打开博客详情弹窗（核心优化：添加目录功能）
     function openBlogModal(elem) {
       const blogIndex = elem.getAttribute('data-blog-index');
       const blog = blogData[blogIndex];
@@ -1693,10 +1607,6 @@
       const modalCategoryText = document.getElementById('blogModalCategoryText');
       const modalDate = document.getElementById('blogModalDate'); // 新增日期显示
       const modalBody = document.getElementById('blogModalBody');
-      const tocList = document.getElementById('tocList');
-      
-      // 重置目录
-      tocList.innerHTML = '<li style="text-align: center; padding: 20px 0; color: var(--light-text); font-size: 14px;">加载中...</li>';
       
       // 设置分类标签颜色和文本
       modalCategory.textContent = categoryTextMap[blog.category];
@@ -1726,19 +1636,24 @@
           return response.text();
         })
         .then(markdownContent => {
-          // 用marked.js解析MD为HTML
-          const htmlContent = marked.parse(markdownContent);
+          // 1. 提取标题，生成目录数据
+          const headings = parseHeadingsFromMd(markdownContent);
+          
+          // 2. 为MD中的标题添加ID，用于锚点跳转
+          const modifiedMd = addIdsToHeadings(markdownContent, headings);
+          
+          // 3. 解析MD为HTML
+          const htmlContent = marked.parse(modifiedMd);
           modalBody.innerHTML = htmlContent;
           
-          // 代码高亮（解析后重新执行高亮）
+          // 4. 生成目录
+          generateToc(headings);
+          
+          // 5. 设置滚动监听，更新当前目录项
+          setupScrollSpy();
+          
+          // 6. 代码高亮
           hljs.highlightAll();
-          
-          // 生成目录
-          const tocHtml = generateTableOfContents(htmlContent);
-          tocList.innerHTML = tocHtml;
-          
-          // 设置滚动监听
-          setupScrollListener();
         })
         .catch(error => {
           // 显示错误状态
@@ -1750,33 +1665,21 @@
               <button onclick="reloadBlogModal(${blogIndex})">重试</button>
             </div>
           `;
-          tocList.innerHTML = '<li style="text-align: center; padding: 20px 0; color: var(--light-text); font-size: 14px;">加载失败</li>';
           console.error('MD文件加载失败：', error);
         });
     }
 
-    // 关闭博客详情弹窗（核心修改：移除滚动监听）
+    // 关闭博客详情弹窗（核心优化）
     function closeBlogModal() {
-      const blogModal = document.getElementById('blogModal');
-      blogModal.classList.remove('blog-modal-active');
+      document.getElementById('blogModal').classList.remove('blog-modal-active');
       document.body.style.overflow = 'auto'; // 恢复页面滚动
-      
-      // 移除内容区域的滚动监听
-      const contentWrapper = document.getElementById('blogContentWrapper');
-      if (scrollListener && contentWrapper) {
-        contentWrapper.removeEventListener('scroll', scrollListener);
-        scrollListener = null; // 重置监听函数引用
-      }
-      
-      // 重置当前博客标题数据
-      currentBlogHeadings = [];
+      currentBlogHeadings = []; // 清空标题列表
     }
 
     // 重试加载博客（核心新增）
     function reloadBlogModal(blogIndex) {
       const blog = blogData[blogIndex];
       const modalBody = document.getElementById('blogModalBody');
-      const tocList = document.getElementById('tocList');
       
       // 重新显示加载状态
       modalBody.innerHTML = `
@@ -1785,7 +1688,6 @@
           <p>重新加载中...</p>
         </div>
       `;
-      tocList.innerHTML = '<li style="text-align: center; padding: 20px 0; color: var(--light-text); font-size: 14px;">加载中...</li>';
       
       // 重新加载并解析MD文件
       fetch(blog.markdown)
@@ -1796,16 +1698,15 @@
           return response.text();
         })
         .then(markdownContent => {
-          const htmlContent = marked.parse(markdownContent);
+          // 提取标题、添加ID、解析HTML
+          const headings = parseHeadingsFromMd(markdownContent);
+          const modifiedMd = addIdsToHeadings(markdownContent, headings);
+          const htmlContent = marked.parse(modifiedMd);
+          
           modalBody.innerHTML = htmlContent;
-          hljs.highlightAll(); // 代码高亮
-          
-          // 生成目录
-          const tocHtml = generateTableOfContents(htmlContent);
-          tocList.innerHTML = tocHtml;
-          
-          // 重新设置滚动监听
-          setupScrollListener();
+          generateToc(headings);
+          setupScrollSpy();
+          hljs.highlightAll();
         })
         .catch(error => {
           modalBody.innerHTML = `
@@ -1816,7 +1717,6 @@
               <button onclick="reloadBlogModal(${blogIndex})">再次重试</button>
             </div>
           `;
-          tocList.innerHTML = '<li style="text-align: center; padding: 20px 0; color: var(--light-text); font-size: 14px;">加载失败</li>';
           console.error('MD文件重新加载失败：', error);
         });
     }
@@ -1835,7 +1735,7 @@
       renderBlogCards(filteredBlogs);
     }
 
-    // 搜索功能（补全截断部分）
+    // 搜索功能
     function searchBlogs() {
       const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
       const activeCategory = document.querySelector('.category-btn.active').classList[1];
@@ -1870,17 +1770,17 @@
       }
     });
 
-    // 日期格式化函数（补全完整功能）
+    // 日期格式化函数（新增）
     function formatDate(dateStr) {
       const date = new Date(dateStr);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${year}年${month}月${day}日`;
     }
 
-    // 页面加载完成后渲染所有博客卡片（关键新增）
-    window.addEventListener('load', function() {
-      renderBlogCards(blogData);
-    });
+    // 初始渲染所有博客
+    renderBlogCards(blogData);
   </script>
+</body>
+</html>
