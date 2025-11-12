@@ -1565,49 +1565,73 @@ const categoryColorMap = {
     }
 
     // 解析MD内容，提取标题（核心优化：兼容特殊格式标题）
-    function parseHeadingsFromMd(markdownContent) {
-      const headings = [];
-      let headingId = 1;
+  // 解析MD内容，提取标题（核心优化：增强过滤逻辑，只保留有效标题）
+function parseHeadingsFromMd(markdownContent) {
+  const headings = [];
+  let headingId = 1;
+  const seenTitles = new Set(); // 用于去重
+  
+  // 优化正则：只匹配真正的标题
+  const headingRegex = /^\s{0,3}(#{1,6})\s+([^\n]+?)\s*$/gm;
+  let match;
+  
+  try {
+    while ((match = headingRegex.exec(markdownContent)) !== null) {
+      const level = match[1].length; // 提取#的数量
+      let text = match[2].trim();
       
-      // 优化正则：兼容标题前后可能的空格、换行，以及标题内包含特殊字符的情况
-      const headingRegex = /^\s*#{1,6}\s+(.*?)\s*$/gm;
-      let match;
+      // 过滤规则：只保留有效标题
+      if (!text || text.trim() === '') continue; // 排除空标题
+      if (text.length < 2) continue; // 排除太短的标题
+      if (/^[\d\W]+$/.test(text)) continue; // 排除纯数字/特殊字符标题
+      if (text.includes('`') || text.includes('```')) continue; // 排除含代码的标题
+      if (/<\/?\w+>/.test(text)) continue; // 排除含HTML标签的标题
+      const invalidPrefixes = ['|', '-', '*', '+', '1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.'];
+      const hasInvalidPrefix = invalidPrefixes.some(prefix => text.startsWith(prefix) && text.length > prefix.length);
+      if (hasInvalidPrefix) continue; // 排除列表/表格伪装的标题
+      if (seenTitles.has(text)) continue; // 去重
+      if (text.includes('http://') || text.includes('https://')) continue; // 排除含链接的标题
+      if (/^[-\=_\*\+]+$/.test(text)) continue; // 排除分隔线类标题
       
-      try {
-        while ((match = headingRegex.exec(markdownContent)) !== null) {
-          const level = match[0].trim().split(/\s+/)[0].length; // 从匹配结果中提取#的数量
-          const text = match[1].trim();
-          const id = `heading-${headingId++}`;
-          
-          headings.push({ level, text, id });
-        }
-        console.log('标题解析成功：', headings);
-      } catch (error) {
-        console.error('标题解析失败：', error);
-      }
-      
-      return headings;
+      seenTitles.add(text);
+      const id = `heading-${headingId++}`;
+      headings.push({ level, text, id });
     }
+    
+    console.log('标题解析成功，有效标题数量：', headings.length);
+    console.log('解析到的标题：', headings.map(h => `${'#'.repeat(h.level)} ${h.text}`));
+  } catch (error) {
+    console.error('标题解析失败：', error);
+  }
+  
+  return headings;
+}
 
-    // 替换MD内容中的标题，添加ID（核心优化：容错处理）
-    function addIdsToHeadings(markdownContent, headings) {
-      let modifiedMd = markdownContent;
-      
-      try {
-        headings.forEach(heading => {
-          const headingMark = '#'.repeat(heading.level);
-          // 兼容标题前后的空格
-          const regex = new RegExp(`^\\s*${headingMark}\\s+${heading.text}\\s*$`, 'gm');
-          modifiedMd = modifiedMd.replace(regex, `${headingMark} <span id="${heading.id}">${heading.text}</span>`);
-        });
-      } catch (error) {
-        console.error('添加标题ID失败：', error);
-        // 失败时返回原内容，不影响正文显示
-        return markdownContent;
-      }
-      
-      return modifiedMd;
-    }
+
+  // 替换MD内容中的标题，添加ID（核心优化：增强容错和匹配精度）
+function addIdsToHeadings(markdownContent, headings) {
+  let modifiedMd = markdownContent;
+  
+  try {
+    headings.forEach(heading => {
+      const headingMark = '#'.repeat(heading.level);
+      // 精确匹配：转义标题中的特殊字符，避免正则错误
+      const escapedText = escapeRegExp(heading.text);
+      const regex = new RegExp(`^\\s{0,3}${headingMark}\\s+${escapedText}\\s*$`, 'gm');
+      modifiedMd = modifiedMd.replace(regex, `${headingMark} <span id="${heading.id}">${heading.text}</span>`);
+    });
+  } catch (error) {
+    console.error('添加标题ID失败：', error);
+    return markdownContent;
+  }
+  
+  return modifiedMd;
+}
+
+// 辅助函数：转义正则特殊字符（必须加！否则标题有特殊字符会出错）
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // 处理标题中的特殊字符
+}
 
     // 打开博客详情弹窗（核心优化：增加错误排查和兜底）
     function openBlogModal(elem) {
