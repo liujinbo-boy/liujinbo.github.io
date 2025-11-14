@@ -1565,49 +1565,79 @@ const categoryColorMap = {
     }
 
     // 解析MD内容，提取标题（核心优化：兼容特殊格式标题）
-    function parseHeadingsFromMd(markdownContent) {
-      const headings = [];
-      let headingId = 1;
-      
-      // 优化正则：兼容标题前后可能的空格、换行，以及标题内包含特殊字符的情况
-      const headingRegex = /^\s*#{1,6}\s+(.*?)\s*$/gm;
-      let match;
-      
-      try {
-        while ((match = headingRegex.exec(markdownContent)) !== null) {
-          const level = match[0].trim().split(/\s+/)[0].length; // 从匹配结果中提取#的数量
-          const text = match[1].trim();
-          const id = `heading-${headingId++}`;
-          
-          headings.push({ level, text, id });
-        }
-        console.log('标题解析成功：', headings);
-      } catch (error) {
-        console.error('标题解析失败：', error);
-      }
-      
-      return headings;
+function parseHeadingsFromMd(markdownContent) {
+  const lines = markdownContent.split('\n');
+  let inCodeBlock = false;
+  const headings = [];
+  let headingId = 1;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // 检查代码块开始/结束（处理带语言标识的情况）
+    if (line.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
     }
+    
+    // 跳过代码块内的所有内容
+    if (inCodeBlock) continue;
+    
+    // 仅匹配标准Markdown标题（#后必须有空格）
+    const headingMatch = line.match(/^#{1,6} (.+)/);
+    if (headingMatch) {
+      const level = headingMatch[0].trim().split(' ')[0].length;
+      const text = headingMatch[1].trim();
+      const id = `heading-${headingId++}`;
+      
+      // 跳过空标题
+      if (text) {
+        headings.push({ level, text, id });
+      }
+    }
+  }
+  
+  return headings;
+}
+
 
     // 替换MD内容中的标题，添加ID（核心优化：容错处理）
-    function addIdsToHeadings(markdownContent, headings) {
-      let modifiedMd = markdownContent;
+    
+// 添加正则转义函数
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 替换原有的 addIdsToHeadings 函数
+function addIdsToHeadings(markdownContent, headings) {
+  let modifiedMd = markdownContent;
+  
+  try {
+    headings.forEach(heading => {
+      const headingMark = '#'.repeat(heading.level);
       
-      try {
-        headings.forEach(heading => {
-          const headingMark = '#'.repeat(heading.level);
-          // 兼容标题前后的空格
-          const regex = new RegExp(`^\\s*${headingMark}\\s+${heading.text}\\s*$`, 'gm');
-          modifiedMd = modifiedMd.replace(regex, `${headingMark} <span id="${heading.id}">${heading.text}</span>`);
-        });
-      } catch (error) {
-        console.error('添加标题ID失败：', error);
-        // 失败时返回原内容，不影响正文显示
-        return markdownContent;
-      }
+      // 安全转义标题文本中的正则特殊字符
+      const escapedText = escapeRegExp(heading.text);
       
-      return modifiedMd;
-    }
+      // 构建精确匹配的正则（要求标题行必须以#开头，后跟空格，且整行匹配）
+      const regex = new RegExp(
+        `^(${headingMark})\\s+(${escapedText})\\s*$`, 
+        'gm'
+      );
+      
+      // 替换为带ID的标题
+      modifiedMd = modifiedMd.replace(
+        regex, 
+        `$1 <span id="${heading.id}">$2</span>`
+      );
+    });
+  } catch (error) {
+    console.error('添加标题ID失败：', error);
+    return markdownContent;
+  }
+  
+  return modifiedMd;
+}
 
     // 打开博客详情弹窗（核心优化：增加错误排查和兜底）
     function openBlogModal(elem) {
