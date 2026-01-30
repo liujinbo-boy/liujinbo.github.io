@@ -1,1902 +1,1535 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>欢迎家访 | 个人博客</title>
-  <!-- 引入Font Awesome图标 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- 引入代码高亮样式 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css">
-  <style>
-    :root {
-      --bg-color: #F8F9FA; /* 柔和护眼背景色 */
-      --text-color: #333;  /* 文字主色 */
-      --light-text: #666;  /* 次要文字色 */
-      --card-bg: #FFFFFF;  /* 卡片背景 */
-      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); /* 柔和阴影 */
-      --hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.09); /* hover阴影 */
-      --avatar-border: 4px solid rgba(54, 207, 201, 0.15); /* 头像边框 */
-      --transition: all 0.3s ease-in-out; /* 流畅过渡 */
-      --spacing: 8px; /* 基础间距 */
-
-      /* 新分类颜色（柔和且区分明显，支持后期扩展） */
-      --category-video: #165DFF;    /* 音视频：科技蓝 */
-      --category-essay: #722ED1;    /* 随笔：温柔紫 */
-      --category-note: #F7BA1E;     /* 学习笔记：暖黄 */
-      --category-life: #36CFC9;     /* 生活记录：青绿 */
-      --category-env: #27AE60;      /* 环境搭建：森林绿（新增） */
-      --category-all: #86909C;      /* 全部：浅灰 */
-      --gallery-mask: rgba(0, 0, 0, 0.85); /* 图片画廊遮罩色 */
-      --blog-modal-mask: rgba(0, 0, 0, 0.7); /* 博客详情遮罩色 */
-      --toc-bg: #F9FAFB; /* 目录背景色 */
-      --toc-hover: rgba(22, 93, 255, 0.05); /* 目录hover色 */
-      --toc-active: #165DFF; /* 目录激活色 */
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      line-height: 1.7;
-      padding-bottom: 60px;
-      overflow-x: hidden; /* 防止画廊滑动时页面横向滚动 */
-    }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 20px 15px;
-    }
-
-    /* 导航栏 */
-    .navbar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px 0;
-      margin-bottom: 20px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .logo {
-      font-size: 26px;
-      font-weight: 600;
-      color: var(--category-video);
-      letter-spacing: 0.5px;
-    }
-
-    /* 个人介绍区域 */
-    .profile {
-      display: flex;
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-      padding: 30px;
-      margin-bottom: 30px;
-      transition: var(--transition);
-      align-items: center;
-    }
-
-    .profile:hover {
-      box-shadow: var(--hover-shadow);
-      transform: translateY(-2px);
-    }
-
-    /* 圆形头像强化 */
-    .profile-avatar {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 30px;
-      border: var(--avatar-border);
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-      transition: var(--transition);
-    }
-
-    .profile-avatar:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .profile-info {
-      flex: 1;
-    }
-
-    .profile-name {
-      font-size: 26px;
-      margin-bottom: 6px;
-      color: var(--text-color);
-      font-weight: 600;
-    }
-
-    .profile-desc {
-      color: var(--light-text);
-      margin-bottom: 12px;
-      font-size: 15px;
-    }
-
-    .profile-bio {
-      margin-bottom: 18px;
-      line-height: 1.8;
-      font-size: 15px;
-      color: var(--text-color);
-    }
-
-    .tech-stack, .hobbies {
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: 8px;
-      gap: 8px;
-    }
-
-    .tech-item, .hobby-item {
-      background-color: rgba(54, 207, 201, 0.08);
-      color: var(--category-life);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-      transition: var(--transition);
-    }
-
-    .tech-item:hover, .hobby-item:hover {
-      background-color: rgba(54, 207, 201, 0.15);
-      transform: translateY(-1px);
-    }
-
-    /* 联系区域 */
-    .contact {
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: 18px;
-      gap: 15px;
-    }
-
-    .contact-item {
-      display: flex;
-      align-items: center;
-      color: var(--light-text);
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 14px;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .contact-item i {
-      font-size: 18px;
-      margin-right: 6px;
-    }
-
-    .contact-item:hover {
-      color: var(--category-video);
-      background-color: rgba(22, 93, 255, 0.05);
-    }
-
-    /* 博客标题+搜索栏 组合 */
-    .works-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .works-title {
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--text-color);
-      padding-bottom: 4px;
-      border-bottom: 2px solid var(--category-video);
-    }
-
-    /* 搜索栏 */
-    .blog-search-box {
-      display: flex;
-      align-items: center;
-      width: 280px;
-      max-width: 100%;
-    }
-
-    .blog-search-box input {
-      flex: 1;
-      padding: 9px 14px;
-      border: 1px solid #e1e4e8;
-      border-radius: 6px 0 0 6px;
-      outline: none;
-      font-size: 14px;
-      transition: var(--transition);
-      background-color: rgba(255,255,255,0.8);
-    }
-
-    .blog-search-box input:focus {
-      border-color: var(--category-video);
-      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
-    }
-
-    .blog-search-box button {
-      padding: 9px 14px;
-      background-color: var(--category-video);
-      color: white;
-      border: none;
-      border-radius: 0 6px 6px 0;
-      cursor: pointer;
-      transition: var(--transition);
-      font-size: 14px;
-    }
-
-    .blog-search-box button:hover {
-      background-color: #0e42d2;
-      transform: translateY(-1px);
-    }
-
-    /* 美化分类按钮（核心优化） */
-    .category-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 25px;
-      justify-content: center;
-    }
-
-    .category-btn {
-      padding: 8px 20px;
-      border: none;
-      border-radius: 24px; /* 超圆润按钮 */
-      color: white;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      display: flex;
-      align-items: center;
-      gap: 8px; /* 图标与文字间距 */
-      background: linear-gradient(135deg, var(--category-all), var(--category-all)); /* 基础渐变 */
-    }
-
-    /* 每个分类专属渐变+图标 */
-    .category-btn.all {
-      background: linear-gradient(135deg, var(--category-all), #6c757d);
-    }
-    .category-btn.video {
-      background: linear-gradient(135deg, var(--category-video), #0e42d2);
-    }
-    .category-btn.essay {
-      background: linear-gradient(135deg, var(--category-essay), #5a23b5);
-    }
-    .category-btn.note {
-      background: linear-gradient(135deg, var(--category-note), #d9a518);
-    }
-    .category-btn.life {
-      background: linear-gradient(135deg, var(--category-life), #2ba8a2);
-    }
-    .category-btn.env { /* 新增环境搭建分类按钮样式 */
-      background: linear-gradient(135deg, var(--category-env), #1e8449);
-    }
-
-    /* hover/active效果强化 */
-    .category-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      opacity: 0.98;
-    }
-    .category-btn.active {
-      transform: translateY(-2px);
-      box-shadow: 0 3px 9px rgba(0,0,0,0.1);
-      filter: brightness(1.05); /* 激活时略微提亮 */
-    }
-
-    /* 作品区域 */
-    .works {
-      margin-top: 10px;
-    }
-
-    .works-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 22px;
-    }
-
-    /* 博客卡片（适配有图/无图/图片类） */
-    .work-card {
-      background-color: var(--card-bg);
-      border-radius: 10px;
-      box-shadow: var(--card-shadow);
-      overflow: hidden;
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      cursor: pointer; /* 图片类博客卡片添加指针样式 */
-    }
-
-    .work-card:hover {
-      box-shadow: var(--hover-shadow);
-      transform: translateY(-3px);
-    }
-
-    /* 有图卡片的图片样式 */
-    .work-img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      transition: var(--transition);
-    }
-    .work-card:hover .work-img {
-      transform: scale(1.03);
-    }
-
-    /* 无图卡片的美化占位区（核心优化） */
-    .work-img-placeholder {
-      width: 100%;
-      height: 160px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      transition: var(--transition);
-      background: linear-gradient(135deg, var(--category-all), #6c757d); /* 基础渐变 */
-      padding: 20px;
-      text-align: center;
-    }
-
-    /* 无图占位区按分类变色 */
-    .work-img-placeholder.video {
-      background: linear-gradient(135deg, var(--category-video), #0e42d2);
-    }
-    .work-img-placeholder.essay {
-      background: linear-gradient(135deg, var(--category-essay), #5a23b5);
-    }
-    .work-img-placeholder.note {
-      background: linear-gradient(135deg, var(--category-note), #d9a518);
-    }
-    .work-img-placeholder.life {
-      background: linear-gradient(135deg, var(--category-life), #2ba8a2);
-    }
-    .work-img-placeholder.env { /* 新增环境搭建分类占位区样式 */
-      background: linear-gradient(135deg, var(--category-env), #1e8449);
-    }
-
-    .work-img-placeholder i {
-      font-size: 36px;
-      margin-bottom: 10px;
-      opacity: 0.8;
-    }
-    .work-img-placeholder span {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-    .work-card:hover .work-img-placeholder {
-      filter: brightness(1.1);
-    }
-
-    /* 卡片内容区 */
-    .work-content {
-      padding: 18px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* 分类标签 */
-    .work-category {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: white;
-      margin-bottom: 10px;
-      font-weight: 500;
-      background-color: var(--category-all);
-    }
-
-    /* 分类标签颜色适配 */
-    .work-category.video {
-      background-color: var(--category-video);
-    }
-    .work-category.essay {
-      background-color: var(--category-essay);
-    }
-    .work-category.note {
-      background-color: var(--category-note);
-    }
-    .work-category.life {
-      background-color: var(--category-life);
-    }
-    .work-category.env { /* 新增环境搭建分类标签样式 */
-      background-color: var(--category-env);
-    }
-
-    /* 图片类博客标识 */
-    .image-gallery-tag {
-      display: inline-block;
-      margin-left: 8px;
-      padding: 1px 6px;
-      background-color: rgba(22, 93, 255, 0.1);
-      color: var(--category-video);
-      font-size: 11px;
-      border-radius: 3px;
-    }
-
-    .work-title {
-      font-size: 17px;
-      margin-bottom: 10px;
-      color: var(--text-color);
-      font-weight: 600;
-      line-height: 1.5;
-    }
-
-    .work-excerpt {
-      color: var(--light-text);
-      margin-bottom: 15px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      font-size: 14px;
-      flex: 1;
-    }
-
-    .work-link {
-      display: inline-block;
-      color: var(--category-video);
-      text-decoration: none;
-      font-weight: 500;
-      transition: var(--transition);
-      font-size: 14px;
-      align-self: flex-start;
-      cursor: pointer; /* 改为指针样式 */
-    }
-
-    .work-link:hover {
-      text-decoration: underline;
-      color: #0e42d2;
-    }
-
-    .work-link i {
-      margin-left: 4px;
-      font-size: 12px;
-    }
-
-    /* 图片画廊弹窗（核心新增） */
-    .image-gallery {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: var(--gallery-mask);
-      z-index: 9999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .gallery-active {
-      display: flex;
-    }
-
-    .gallery-container {
-      position: relative;
-      width: 100%;
-      max-width: 1200px;
-      height: 80vh;
-      max-height: 800px;
-    }
-
-    .gallery-slide {
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .gallery-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background-color: rgba(0,0,0,0.2);
-    }
-
-    /* 画廊控制按钮 */
-    .gallery-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: rgba(255,255,255,0.2);
-      color: white;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-    }
-
-    .gallery-btn:hover {
-      background-color: rgba(255,255,255,0.3);
-    }
-
-    .gallery-prev {
-      left: -60px;
-    }
-
-    .gallery-next {
-      right: -60px;
-    }
-
-    /* 画廊关闭按钮 */
-    .gallery-close {
-      position: absolute;
-      top: -40px;
-      right: 0;
-      color: white;
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .gallery-close:hover {
-      color: #ddd;
-    }
-
-    /* 画廊图片索引 */
-    .gallery-index {
-      position: absolute;
-      bottom: -30px;
-      left: 0;
-      color: white;
-      font-size: 14px;
-    }
-
-    /* 触摸滑动样式 */
-    .gallery-slide-container {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .gallery-slide-wrapper {
-      display: flex;
-      height: 100%;
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .gallery-slide-item {
-      min-width: 100%;
-      height: 100%;
-    }
-
-    /* 博客详情弹窗（核心优化：左侧目录+固定关闭按钮+内容不溢出） */
-    .blog-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: var(--blog-modal-mask);
-      z-index: 9999;
-      display: none;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 40px 20px;
-      overflow-y: auto;
-    }
-
-    .blog-modal-active {
-      display: flex;
-    }
-
-    .blog-modal-content {
-      width: 100%;
-      max-width: 1200px; /* 加宽弹窗以容纳目录 */
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      padding: 30px;
-      position: relative;
-      margin-bottom: 40px;
-      display: flex;
-      gap: 25px;
-      /* 关键：设置最大高度和溢出隐藏，确保整体不超出屏幕 */
-      max-height: calc(100vh - 80px);
-      overflow: hidden;
-    }
-
-    /* 固定关闭按钮 - 始终显示在右上角 */
-    .blog-modal-close {
-      position: fixed; /* 改为fixed定位，相对于视口 */
-      top: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: rgba(0,0,0,0.1);
-      color: white;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000; /* 确保在最上层 */
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .blog-modal-close:hover {
-      background-color: rgba(0,0,0,0.2);
-      transform: scale(1.05);
-    }
-
-    /* 左侧目录区域 */
-    .blog-modal-toc {
-      width: 260px;
-      min-width: 260px;
-      background-color: var(--toc-bg);
-      border-radius: 8px;
-      padding: 20px;
-      overflow-y: auto; /* 目录超出时可滚动 */
-      max-height: calc(100vh - 140px); /* 限制目录高度 */
-      box-shadow: inset 0 0 6px rgba(0,0,0,0.02);
-    }
-
-    .toc-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: var(--text-color);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .toc-title i {
-      color: var(--toc-active);
-    }
-
-    .toc-list {
-      list-style: none;
-    }
-
-    .toc-item {
-      margin-bottom: 6px;
-    }
-
-    .toc-link {
-      display: block;
-      padding: 6px 10px;
-      border-radius: 4px;
-      color: var(--light-text);
-      text-decoration: none;
-      font-size: 14px;
-      transition: var(--transition);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .toc-link:hover {
-      background-color: var(--toc-hover);
-      color: var(--text-color);
-    }
-
-    .toc-link.active {
-      background-color: rgba(22, 93, 255, 0.1);
-      color: var(--toc-active);
-      font-weight: 500;
-    }
-
-    /* 标题层级缩进 */
-    .toc-level-2 {
-      padding-left: 15px;
-    }
-    .toc-level-3 {
-      padding-left: 30px;
-    }
-    .toc-level-4 {
-      padding-left: 45px;
-    }
-
-    /* 右侧内容区域 - 核心优化：确保不溢出 */
-    .blog-modal-main {
-      flex: 1;
-      overflow-y: auto; /* 内容超出时可滚动 */
-      padding-right: 10px; /* 预留滚动条空间 */
-      max-height: calc(100vh - 140px); /* 限制内容高度，确保不超出屏幕 */
-    }
-
-    .blog-modal-header {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .blog-modal-category {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      color: white;
-      margin-bottom: 10px;
-      font-weight: 500;
-    }
-
-    .blog-modal-title {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: var(--text-color);
-      line-height: 1.6;
-    }
-
-    .blog-modal-meta {
-      color: var(--light-text);
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .blog-modal-meta i {
-      margin-right: 4px;
-    }
-
-    /* MD解析后的内容样式（美化+不溢出） */
-    .blog-modal-body {
-      color: var(--text-color);
-      line-height: 1.8;
-      font-size: 16px;
-      /* 关键：确保内容不会超出容器 */
-      width: 100%;
-      overflow-x: auto; /* 处理代码块等宽内容 */
-    }
-
-    /* 为所有标题添加ID，用于锚点跳转 */
-    .blog-modal-body h1,
-    .blog-modal-body h2,
-    .blog-modal-body h3,
-    .blog-modal-body h4,
-    .blog-modal-body h5,
-    .blog-modal-body h6 {
-      margin: 25px 0 15px;
-      color: var(--text-color);
-      font-weight: 600;
-      scroll-margin-top: 20px; /* 锚点跳转偏移量 */
-    }
-
-    .blog-modal-body h1 {
-      font-size: 28px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 10px;
-    }
-
-    .blog-modal-body h2 {
-      font-size: 24px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 8px;
-    }
-
-    .blog-modal-body h3 {
-      font-size: 20px;
-    }
-
-    .blog-modal-body p {
-      margin-bottom: 18px;
-    }
-
-    .blog-modal-body img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin: 20px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      display: block; /* 防止图片底部留白 */
-    }
-
-    .blog-modal-body a {
-      color: var(--category-video);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(22, 93, 255, 0.3);
-      transition: var(--transition);
-    }
-
-    .blog-modal-body a:hover {
-      color: #0e42d2;
-      border-bottom-color: var(--category-video);
-    }
-
-    .blog-modal-body ul,
-    .blog-modal-body ol {
-      margin: 15px 0 15px 25px;
-      padding-left: 10px;
-    }
-
-    .blog-modal-body li {
-      margin-bottom: 8px;
-    }
-
-    .blog-modal-body blockquote {
-      border-left: 4px solid var(--category-video);
-      padding: 10px 15px;
-      margin: 15px 0;
-      background-color: rgba(22, 93, 255, 0.03);
-      border-radius: 0 4px 4px 0;
-    }
-
-    .blog-modal-body code {
-      background-color: rgba(0,0,0,0.04);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 15px;
-      font-family: 'Consolas', 'Monaco', monospace;
-    }
-
-    .blog-modal-body pre {
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 20px 0;
-      overflow-x: auto; /* 代码块横向滚动 */
-      border: 1px solid #eee;
-    }
-
-    .blog-modal-body pre code {
-      background: none;
-      padding: 0;
-      font-size: 14px;
-    }
-
-    /* 加载和错误状态容器 - 确保居中 */
-    .blog-modal-loading, .blog-modal-error {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--light-text);
-      min-height: 300px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .blog-modal-loading i {
-      font-size: 48px;
-      margin-bottom: 15px;
-      color: var(--category-video);
-      animation: spin 1.5s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .blog-modal-error i {
-      font-size: 48px;
-      margin-bottom: 15px;
-      color: #ff4d4f;
-    }
-
-    .blog-modal-error button {
-      margin-top: 20px;
-      padding: 8px 16px;
-      background-color: var(--category-video);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .blog-modal-error button:hover {
-      background-color: #0e42d2;
-    }
-
-    /* 页脚 */
-    .footer {
-      text-align: center;
-      padding: 25px 0;
-      margin-top: 40px;
-      border-top: 1px solid rgba(0,0,0,0.05);
-      color: var(--light-text);
-      font-size: 14px;
-    }
-
-    /* 响应式适配 - 移动端隐藏目录 */
-    @media (max-width: 992px) {
-      .blog-modal-content {
-        flex-direction: column;
-        gap: 20px;
-        max-height: calc(100vh - 60px);
-      }
-
-      .blog-modal-toc {
-        width: 100%;
-        min-width: auto;
-        max-height: 200px; /* 移动端目录高度限制 */
-      }
-
-      .blog-modal-main {
-        max-height: calc(100vh - 320px);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .profile {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 25px 20px;
-      }
-
-      .profile-avatar {
-        margin-right: 0;
-        margin-bottom: 20px;
-        width: 120px;
-        height: 120px;
-      }
-
-      .tech-stack, .hobbies {
-        justify-content: center;
-      }
-
-      .contact {
-        justify-content: center;
-      }
-
-      .works-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .blog-search-box {
-        width: 100%;
-        margin-top: 8px;
-      }
-
-      .category-buttons {
-        justify-content: flex-start;
-        gap: 8px;
-      }
-
-      .category-btn {
-        padding: 7px 16px;
-        font-size: 13px;
-      }
-
-      .works-list {
-        grid-template-columns: 1fr;
-        gap: 18px;
-      }
-
-      .work-img, .work-img-placeholder {
-        height: 150px;
-      }
-
-      /* 移动端画廊适配 */
-      .gallery-container {
-        height: 70vh;
-      }
-
-      .gallery-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-      }
-
-      .gallery-prev {
-        left: 10px;
-      }
-
-      .gallery-next {
-        right: 10px;
-      }
-
-      .gallery-close {
-        top: -35px;
-        font-size: 20px;
-      }
-
-      .gallery-index {
-        bottom: -25px;
-      }
-
-      /* 移动端博客详情弹窗适配 */
-      .blog-modal {
-        padding: 20px 10px;
-      }
-
-      .blog-modal-content {
-        padding: 20px 15px;
-      }
-
-      .blog-modal-title {
-        font-size: 20px;
-      }
-
-      .blog-modal-body {
-        font-size: 15px;
-        line-height: 1.7;
-      }
-
-      .blog-modal-body h1 {
-        font-size: 24px;
-      }
-
-      .blog-modal-body h2 {
-        font-size: 20px;
-      }
-
-      .blog-modal-body h3 {
-        font-size: 18px;
-      }
-
-      /* 移动端关闭按钮位置调整 */
-      .blog-modal-close {
-        top: 15px;
-        right: 15px;
-        width: 36px;
-        height: 36px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .logo {
-        font-size: 22px;
-      }
-
-      .profile-name {
-        font-size: 24px;
-      }
-
-      .works-title {
-        font-size: 20px;
-      }
-
-      .category-btn {
-        padding: 6px 12px;
-        gap: 6px;
-      }
-
-      .category-btn i {
-        font-size: 12px;
-      }
-
-      .gallery-container {
-        height: 60vh;
-      }
-
-      /* 移动端隐藏目录（空间不足时） */
-      .blog-modal-toc {
-        display: none;
-      }
-
-      .blog-modal-main {
-        max-height: calc(100vh - 140px);
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>欢迎家访 | 个人博客</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css">
+<style>
+:root {
+--bg-color: #F8F9FA;
+--text-color: #333;
+--light-text: #666;
+--card-bg: #FFFFFF;
+--card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+--hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.09);
+--avatar-border: 4px solid rgba(54, 207, 201, 0.15);
+--transition: all 0.3s ease-in-out;
+--spacing: 8px;
+--category-video: #165DFF;
+--category-essay: #722ED1;
+--category-note: #F7BA1E;
+--category-life: #36CFC9;
+--category-env: #27AE60;
+--category-all: #86909C;
+--gallery-mask: rgba(0, 0, 0, 0.85);
+--blog-modal-mask: rgba(0, 0, 0, 0.7);
+--toc-bg: #F9FAFB;
+--toc-hover: rgba(22, 93, 255, 0.05);
+--toc-active: #165DFF;
+}
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+background-color: var(--bg-color);
+color: var(--text-color);
+line-height: 1.7;
+padding-bottom: 60px;
+overflow-x: hidden;
+}
+.container {
+max-width: 1300px; /* 增加容器宽度 */
+margin: 0 auto;
+padding: 20px 15px;
+}
+.navbar {
+display: flex;
+justify-content: center;
+align-items: center;
+padding: 20px 0;
+margin-bottom: 20px;
+border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.logo {
+font-size: 26px;
+font-weight: 600;
+color: var(--category-video);
+letter-spacing: 0.5px;
+}
+.profile {
+display: flex;
+background-color: var(--card-bg);
+border-radius: 12px;
+box-shadow: var(--card-shadow);
+padding: 30px;
+margin-bottom: 30px;
+transition: var(--transition);
+align-items: center;
+}
+.profile:hover {
+box-shadow: var(--hover-shadow);
+transform: translateY(-2px);
+}
+.profile-avatar {
+width: 130px;
+height: 130px;
+border-radius: 50%;
+object-fit: cover;
+margin-right: 30px;
+border: var(--avatar-border);
+box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+transition: var(--transition);
+}
+.profile-avatar:hover {
+transform: scale(1.03);
+box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.profile-info {
+flex: 1;
+}
+.profile-name {
+font-size: 26px;
+margin-bottom: 6px;
+color: var(--text-color);
+font-weight: 600;
+}
+.profile-desc {
+color: var(--light-text);
+margin-bottom: 12px;
+font-size: 15px;
+}
+.profile-bio {
+margin-bottom: 18px;
+line-height: 1.8;
+font-size: 15px;
+color: var(--text-color);
+}
+.tech-stack, .hobbies {
+display: flex;
+flex-wrap: wrap;
+margin-top: 8px;
+gap: 8px;
+}
+.tech-item, .hobby-item {
+background-color: rgba(54, 207, 201, 0.08);
+color: var(--category-life);
+padding: 5px 12px;
+border-radius: 20px;
+font-size: 14px;
+transition: var(--transition);
+}
+.tech-item:hover, .hobby-item:hover {
+background-color: rgba(54, 207, 201, 0.15);
+transform: translateY(-1px);
+}
+.contact {
+display: flex;
+flex-wrap: wrap;
+margin-top: 18px;
+gap: 15px;
+}
+.contact-item {
+display: flex;
+align-items: center;
+color: var(--light-text);
+text-decoration: none;
+transition: var(--transition);
+font-size: 14px;
+padding: 4px 8px;
+border-radius: 4px;
+}
+.contact-item i {
+font-size: 18px;
+margin-right: 6px;
+}
+.contact-item:hover {
+color: var(--category-video);
+background-color: rgba(22, 93, 255, 0.05);
+}
+.works-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+flex-wrap: wrap;
+gap: 12px;
+}
+.works-title {
+font-size: 22px;
+font-weight: 600;
+color: var(--text-color);
+padding-bottom: 4px;
+border-bottom: 2px solid var(--category-video);
+}
+.blog-search-box {
+display: flex;
+align-items: center;
+width: 280px;
+max-width: 100%;
+}
+.blog-search-box input {
+flex: 1;
+padding: 9px 14px;
+border: 1px solid #e1e4e8;
+border-radius: 6px 0 0 6px;
+outline: none;
+font-size: 14px;
+transition: var(--transition);
+background-color: rgba(255,255,255,0.8);
+}
+.blog-search-box input:focus {
+border-color: var(--category-video);
+box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+}
+.blog-search-box button {
+padding: 9px 14px;
+background-color: var(--category-video);
+color: white;
+border: none;
+border-radius: 0 6px 6px 0;
+cursor: pointer;
+transition: var(--transition);
+font-size: 14px;
+}
+.blog-search-box button:hover {
+background-color: #0e42d2;
+transform: translateY(-1px);
+}
+.category-buttons {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+margin-bottom: 25px;
+justify-content: center;
+}
+.category-btn {
+padding: 8px 20px;
+border: none;
+border-radius: 24px;
+color: white;
+font-size: 14px;
+font-weight: 500;
+cursor: pointer;
+transition: var(--transition);
+box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+display: flex;
+align-items: center;
+gap: 8px;
+background: linear-gradient(135deg, var(--category-all), var(--category-all));
+}
+.category-btn.all {
+background: linear-gradient(135deg, var(--category-all), #6c757d);
+}
+.category-btn.video {
+background: linear-gradient(135deg, var(--category-video), #0e42d2);
+}
+.category-btn.essay {
+background: linear-gradient(135deg, var(--category-essay), #5a23b5);
+}
+.category-btn.note {
+background: linear-gradient(135deg, var(--category-note), #d9a518);
+}
+.category-btn.life {
+background: linear-gradient(135deg, var(--category-life), #2ba8a2);
+}
+.category-btn.env {
+background: linear-gradient(135deg, var(--category-env), #1e8449);
+}
+.category-btn:hover {
+transform: translateY(-3px);
+box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+opacity: 0.98;
+}
+.category-btn.active {
+transform: translateY(-2px);
+box-shadow: 0 3px 9px rgba(0,0,0,0.1);
+filter: brightness(1.05);
+}
+.works {
+margin-top: 10px;
+}
+.works-list {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 增加卡片最小宽度 */
+gap: 25px; /* 增加卡片间距 */
+}
+.work-card {
+background-color: var(--card-bg);
+border-radius: 10px;
+box-shadow: var(--card-shadow);
+overflow: hidden;
+transition: var(--transition);
+display: flex;
+flex-direction: column;
+cursor: pointer;
+}
+.work-card:hover {
+box-shadow: var(--hover-shadow);
+transform: translateY(-3px);
+}
+.work-img {
+width: 100%;
+height: 180px; /* 增加图片高度 */
+object-fit: cover;
+transition: var(--transition);
+}
+.work-card:hover .work-img {
+transform: scale(1.03);
+}
+.work-img-placeholder {
+width: 100%;
+height: 180px; /* 增加占位区高度 */
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+color: white;
+transition: var(--transition);
+background: linear-gradient(135deg, var(--category-all), #6c757d);
+padding: 20px;
+text-align: center;
+}
+.work-img-placeholder.video {
+background: linear-gradient(135deg, var(--category-video), #0e42d2);
+}
+.work-img-placeholder.essay {
+background: linear-gradient(135deg, var(--category-essay), #5a23b5);
+}
+.work-img-placeholder.note {
+background: linear-gradient(135deg, var(--category-note), #d9a518);
+}
+.work-img-placeholder.life {
+background: linear-gradient(135deg, var(--category-life), #2ba8a2);
+}
+.work-img-placeholder.env {
+background: linear-gradient(135deg, var(--category-env), #1e8449);
+}
+.work-img-placeholder i {
+font-size: 36px;
+margin-bottom: 10px;
+opacity: 0.8;
+}
+.work-img-placeholder span {
+font-size: 14px;
+opacity: 0.9;
+}
+.work-card:hover .work-img-placeholder {
+filter: brightness(1.1);
+}
+.work-content {
+padding: 20px; /* 增加内容内边距 */
+flex: 1;
+display: flex;
+flex-direction: column;
+}
+.work-category {
+display: inline-block;
+padding: 4px 12px; /* 增加标签内边距 */
+border-radius: 6px;
+font-size: 13px; /* 稍微增大字体 */
+color: white;
+margin-bottom: 12px; /* 增加底部间距 */
+font-weight: 500;
+background-color: var(--category-all);
+}
+.work-category.video {
+background-color: var(--category-video);
+}
+.work-category.essay {
+background-color: var(--category-essay);
+}
+.work-category.note {
+background-color: var(--category-note);
+}
+.work-category.life {
+background-color: var(--category-life);
+}
+.work-category.env {
+background-color: var(--category-env);
+}
+.image-gallery-tag {
+display: inline-block;
+margin-left: 8px;
+padding: 2px 7px; /* 调整内边距 */
+background-color: rgba(22, 93, 255, 0.1);
+color: var(--category-video);
+font-size: 11px;
+border-radius: 3px;
+}
+.work-title {
+font-size: 18px; /* 增加标题字体大小 */
+margin-bottom: 12px;
+color: var(--text-color);
+font-weight: 600;
+line-height: 1.5;
+}
+.work-excerpt {
+color: var(--light-text);
+margin-bottom: 16px;
+display: -webkit-box;
+-webkit-line-clamp: 3;
+-webkit-box-orient: vertical;
+overflow: hidden;
+font-size: 14.5px; /* 稍微增大摘要字体 */
+flex: 1;
+}
+.work-link {
+display: inline-block;
+color: var(--category-video);
+text-decoration: none;
+font-weight: 500;
+transition: var(--transition);
+font-size: 14.5px; /* 增加链接字体大小 */
+align-self: flex-start;
+cursor: pointer;
+}
+.work-link:hover {
+text-decoration: underline;
+color: #0e42d2;
+}
+.work-link i {
+margin-left: 4px;
+font-size: 12px;
+}
+.image-gallery {
+position: fixed;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+background-color: var(--gallery-mask);
+z-index: 9999;
+display: none;
+align-items: center;
+justify-content: center;
+padding: 20px;
+}
+.gallery-active {
+display: flex;
+}
+.gallery-container {
+position: relative;
+width: 100%;
+max-width: 1400px; /* 增加画廊最大宽度 */
+height: 85vh; /* 增加画廊高度 */
+max-height: 900px;
+}
+.gallery-slide {
+width: 100%;
+height: 100%;
+border-radius: 8px;
+overflow: hidden;
+}
+.gallery-img {
+width: 100%;
+height: 100%;
+object-fit: contain;
+background-color: rgba(0,0,0,0.2);
+}
+.gallery-btn {
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+width: 55px; /* 增加按钮大小 */
+height: 55px;
+border-radius: 50%;
+background-color: rgba(255,255,255,0.2);
+color: white;
+border: none;
+font-size: 26px; /* 增加图标大小 */
+cursor: pointer;
+transition: var(--transition);
+display: flex;
+align-items: center;
+justify-content: center;
+backdrop-filter: blur(4px);
+}
+.gallery-btn:hover {
+background-color: rgba(255,255,255,0.3);
+}
+.gallery-prev {
+left: -70px; /* 调整按钮位置 */
+}
+.gallery-next {
+right: -70px;
+}
+.gallery-close {
+position: absolute;
+top: -45px; /* 调整关闭按钮位置 */
+right: 0;
+color: white;
+background: none;
+border: none;
+font-size: 26px;
+cursor: pointer;
+transition: var(--transition);
+}
+.gallery-close:hover {
+color: #ddd;
+}
+.gallery-index {
+position: absolute;
+bottom: -35px;
+left: 0;
+color: white;
+font-size: 15px;
+}
+.gallery-slide-container {
+width: 100%;
+height: 100%;
+overflow: hidden;
+position: relative;
+}
+.gallery-slide-wrapper {
+display: flex;
+height: 100%;
+transition: transform 0.3s ease-in-out;
+}
+.gallery-slide-item {
+min-width: 100%;
+height: 100%;
+}
+.blog-modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+background-color: var(--blog-modal-mask);
+z-index: 9999;
+display: none;
+align-items: flex-start;
+justify-content: center;
+padding: 40px 30px; /* 增加左右内边距 */
+overflow-y: auto;
+}
+.blog-modal-active {
+display: flex;
+}
+.blog-modal-content {
+width: 100%;
+max-width: 1500px; /* 大幅增加弹窗最大宽度 */
+background-color: var(--card-bg);
+border-radius: 12px;
+box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+padding: 35px; /* 增加内边距 */
+position: relative;
+margin-bottom: 40px;
+display: flex;
+gap: 30px; /* 增加目录与内容间距 */
+max-height: calc(100vh - 80px);
+overflow: hidden;
+}
+.blog-modal-close {
+position: fixed;
+top: 25px;
+right: 25px;
+width: 45px; /* 增加关闭按钮大小 */
+height: 45px;
+border-radius: 50%;
+background-color: rgba(0,0,0,0.1);
+color: white;
+border: none;
+font-size: 20px;
+cursor: pointer;
+transition: var(--transition);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 10000;
+box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.blog-modal-close:hover {
+background-color: rgba(0,0,0,0.2);
+transform: scale(1.05);
+}
+.blog-modal-toc {
+width: 300px; /* 增加目录宽度 */
+min-width: 300px;
+background-color: var(--toc-bg);
+border-radius: 8px;
+padding: 22px; /* 增加目录内边距 */
+overflow-y: auto;
+max-height: calc(100vh - 150px);
+box-shadow: inset 0 0 6px rgba(0,0,0,0.02);
+}
+.toc-title {
+font-size: 17px; /* 增加目录标题字体 */
+font-weight: 600;
+margin-bottom: 16px;
+color: var(--text-color);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.toc-title i {
+color: var(--toc-active);
+}
+.toc-list {
+list-style: none;
+}
+.toc-item {
+margin-bottom: 7px;
+}
+.toc-link {
+display: block;
+padding: 7px 12px; /* 增加目录项内边距 */
+border-radius: 4px;
+color: var(--light-text);
+text-decoration: none;
+font-size: 14.5px; /* 增加目录字体大小 */
+transition: var(--transition);
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.toc-link:hover {
+background-color: var(--toc-hover);
+color: var(--text-color);
+}
+.toc-link.active {
+background-color: rgba(22, 93, 255, 0.1);
+color: var(--toc-active);
+font-weight: 500;
+}
+.toc-level-2 {
+padding-left: 18px;
+}
+.toc-level-3 {
+padding-left: 36px;
+}
+.toc-level-4 {
+padding-left: 54px;
+}
+.blog-modal-main {
+flex: 1;
+overflow-y: auto;
+padding-right: 15px;
+max-height: calc(100vh - 150px);
+}
+.blog-modal-header {
+margin-bottom: 28px;
+padding-bottom: 16px;
+border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.blog-modal-category {
+display: inline-block;
+padding: 5px 14px; /* 增加分类标签内边距 */
+border-radius: 6px;
+font-size: 14px;
+color: white;
+margin-bottom: 12px;
+font-weight: 500;
+}
+.blog-modal-title {
+font-size: 28px; /* 增加标题字体大小 */
+margin-bottom: 12px;
+color: var(--text-color);
+line-height: 1.5;
+}
+.blog-modal-meta {
+color: var(--light-text);
+font-size: 15px; /* 增加元信息字体大小 */
+display: flex;
+align-items: center;
+gap: 18px;
+}
+.blog-modal-meta i {
+margin-right: 5px;
+}
+.blog-modal-body {
+color: var(--text-color);
+line-height: 1.85; /* 增加行高提升可读性 */
+font-size: 17px; /* 增加正文字体大小 */
+width: 100%;
+overflow-x: auto;
+max-width: 1000px; /* 限制内容最大宽度，保证可读性 */
+margin: 0 auto; /* 内容居中 */
+}
+.blog-modal-body h1,
+.blog-modal-body h2,
+.blog-modal-body h3,
+.blog-modal-body h4,
+.blog-modal-body h5,
+.blog-modal-body h6 {
+margin: 28px 0 18px;
+color: var(--text-color);
+font-weight: 600;
+scroll-margin-top: 30px;
+}
+.blog-modal-body h1 {
+font-size: 32px;
+border-bottom: 1px solid #eee;
+padding-bottom: 12px;
+}
+.blog-modal-body h2 {
+font-size: 28px;
+border-bottom: 1px solid #eee;
+padding-bottom: 10px;
+}
+.blog-modal-body h3 {
+font-size: 24px;
+}
+.blog-modal-body p {
+margin-bottom: 20px;
+}
+.blog-modal-body img {
+max-width: 100%;
+border-radius: 8px;
+margin: 25px auto; /* 图片居中 */
+box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+display: block;
+}
+.blog-modal-body a {
+color: var(--category-video);
+text-decoration: none;
+border-bottom: 1px solid rgba(22, 93, 255, 0.3);
+transition: var(--transition);
+}
+.blog-modal-body a:hover {
+color: #0e42d2;
+border-bottom-color: var(--category-video);
+}
+.blog-modal-body ul,
+.blog-modal-body ol {
+margin: 18px 0 18px 30px;
+padding-left: 10px;
+}
+.blog-modal-body li {
+margin-bottom: 10px;
+font-size: 17px;
+}
+.blog-modal-body blockquote {
+border-left: 4px solid var(--category-video);
+padding: 12px 18px;
+margin: 20px 0;
+background-color: rgba(22, 93, 255, 0.03);
+border-radius: 0 4px 4px 0;
+font-size: 17px;
+}
+.blog-modal-body code {
+background-color: rgba(0,0,0,0.04);
+padding: 3px 7px;
+border-radius: 4px;
+font-size: 16px;
+font-family: 'Consolas', 'Monaco', monospace;
+}
+.blog-modal-body pre {
+background-color: #f8f9fa;
+border-radius: 8px;
+padding: 18px;
+margin: 25px 0;
+overflow-x: auto;
+border: 1px solid #eee;
+}
+.blog-modal-body pre code {
+background: none;
+padding: 0;
+font-size: 15px;
+}
+.blog-modal-loading, .blog-modal-error {
+text-align: center;
+padding: 70px 20px;
+color: var(--light-text);
+min-height: 300px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+.blog-modal-loading i {
+font-size: 52px;
+margin-bottom: 18px;
+color: var(--category-video);
+animation: spin 1.5s linear infinite;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+.blog-modal-error i {
+font-size: 52px;
+margin-bottom: 18px;
+color: #ff4d4f;
+}
+.blog-modal-error button {
+margin-top: 22px;
+padding: 10px 20px;
+background-color: var(--category-video);
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+transition: var(--transition);
+font-size: 15px;
+}
+.blog-modal-error button:hover {
+background-color: #0e42d2;
+}
+.footer {
+text-align: center;
+padding: 25px 0;
+margin-top: 40px;
+border-top: 1px solid rgba(0,0,0,0.05);
+color: var(--light-text);
+font-size: 14px;
+}
+@media (max-width: 992px) {
+.blog-modal-content {
+flex-direction: column;
+gap: 20px;
+max-height: calc(100vh - 60px);
+}
+.blog-modal-toc {
+width: 100%;
+min-width: auto;
+max-height: 200px;
+}
+.blog-modal-main {
+max-height: calc(100vh - 320px);
+}
+}
+@media (max-width: 768px) {
+.profile {
+flex-direction: column;
+align-items: center;
+text-align: center;
+padding: 25px 20px;
+}
+.profile-avatar {
+margin-right: 0;
+margin-bottom: 20px;
+width: 120px;
+height: 120px;
+}
+.tech-stack, .hobbies {
+justify-content: center;
+}
+.contact {
+justify-content: center;
+}
+.works-header {
+flex-direction: column;
+align-items: flex-start;
+}
+.blog-search-box {
+width: 100%;
+margin-top: 8px;
+}
+.category-buttons {
+justify-content: flex-start;
+gap: 8px;
+}
+.category-btn {
+padding: 7px 16px;
+font-size: 13px;
+}
+.works-list {
+grid-template-columns: 1fr;
+gap: 18px;
+}
+.work-img, .work-img-placeholder {
+height: 150px;
+}
+.gallery-container {
+height: 70vh;
+}
+.gallery-btn {
+width: 40px;
+height: 40px;
+font-size: 18px;
+}
+.gallery-prev {
+left: 10px;
+}
+.gallery-next {
+right: 10px;
+}
+.gallery-close {
+top: -35px;
+font-size: 20px;
+}
+.gallery-index {
+bottom: -25px;
+}
+.blog-modal {
+padding: 20px 10px;
+}
+.blog-modal-content {
+padding: 20px 15px;
+}
+.blog-modal-title {
+font-size: 20px;
+}
+.blog-modal-body {
+font-size: 15px;
+line-height: 1.7;
+max-width: 100%;
+}
+.blog-modal-body h1 {
+font-size: 24px;
+}
+.blog-modal-body h2 {
+font-size: 20px;
+}
+.blog-modal-body h3 {
+font-size: 18px;
+}
+.blog-modal-close {
+top: 15px;
+right: 15px;
+width: 36px;
+height: 36px;
+}
+}
+@media (max-width: 480px) {
+.logo {
+font-size: 22px;
+}
+.profile-name {
+font-size: 24px;
+}
+.works-title {
+font-size: 20px;
+}
+.category-btn {
+padding: 6px 12px;
+gap: 6px;
+}
+.category-btn i {
+font-size: 12px;
+}
+.gallery-container {
+height: 60vh;
+}
+.blog-modal-toc {
+display: none;
+}
+.blog-modal-main {
+max-height: calc(100vh - 140px);
+}
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <!-- 导航栏 -->
-    <nav class="navbar">
-      <div class="logo">bobo的快乐妙妙屋</div>
-    </nav>
-
-    <!-- 个人介绍区域 -->
-    <section class="profile">
-      <img src="website/bobo.jpg" alt="个人头像" class="profile-avatar">
-      <div class="profile-info">
-        <h2 class="profile-name">bobo</h2>
-        <p class="profile-desc">嵌入式Linux开发工程师 | 技术爱好者 | 生活记录者</p>
-        <p class="profile-bio">你好！欢迎来到我的个人小站～ 这里记录了我在嵌入式Linux领域的学习心得、项目实践，以及生活中的点滴瞬间。希望我的分享能给你带来一点帮助，也期待和你一起交流成长！</p>
-        <div>
-          <strong style="color: var(--light-text); font-weight: 500;">技术栈：</strong>
-          <div class="tech-stack">
-            <div class="tech-item">嵌入式Linux</div>
-            <div class="tech-item">C/C++</div>
-            <div class="tech-item">linux应用开发</div>
-            <div class="tech-item">音视频流媒体</div>
-            <div class="tech-item">驱动开发</div>
-            <div class="tech-item">单片机</div>
-            <div class="tech-item">QT</div>
-          </div>
-        </div>
-        <div style="margin-top: 10px;">
-          <strong style="color: var(--light-text); font-weight: 500;">兴趣爱好：</strong>
-          <div class="hobbies">
-            <div class="hobby-item">编程</div>
-            <div class="hobby-item">抽象</div>
-            <div class="hobby-item">骑行</div>
-            <div class="hobby-item">阅读</div>
-            <div class="hobby-item">music</div>
-          </div>
-        </div>
-        <div class="contact">
-          <a href="https://github.com/liujinbo-boy" target="_blank" class="contact-item">
-            <i class="fab fa-github" style="color: #333;"></i> GitHub链接
-          </a>
-          <a href="mailto:liujinbo1234@qq.com" target="_blank" class="contact-item">
-            <i class="fas fa-envelope" style="color: #1a73e8;"></i> liujinbo1234@qq.com
-          </a>
-          <a  target="_blank" class="contact-item">
-            <i class="fab fa-qq" style="color: #1a73e8;"></i> 3225933788
-          </a>
-          <a  target="_blank" class="contact-item">
-            <i class="fab fa-weixin" style="color: #07c160;"></i> L17752785918
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 博客作品展示区域 -->
-    <section class="works">
-      <!-- 标题+搜索栏 组合 -->
-      <div class="works-header">
-        <h2 class="works-title">我的博客作品</h2>
-        <div class="blog-search-box">
-          <input type="text" id="searchInput" placeholder="搜索关键词（如：驱动开发、流媒体、生活）...">
-          <button onclick="searchBlogs()"><i class="fas fa-search"></i></button>
-        </div>
-      </div>
-
-      <!-- 美化分类按钮（更新为你的5个分类+全部） -->
-      <div class="category-buttons">
-        <button class="category-btn all active" onclick="filterByCategory('all')">
-          <i class="fas fa-th"></i> 全部
-        </button>
-        <button class="category-btn video" onclick="filterByCategory('video')">
-          <i class="fas fa-video"></i> 音视频流媒体
-        </button>
-        <button class="category-btn env" onclick="filterByCategory('env')"> 
-          <i class="fas fa-tools"></i> linux服务器运维
-        </button>
-        <button class="category-btn note" onclick="filterByCategory('note')">
-          <i class="fas fa-book-open"></i> 学习笔记
-        </button>
-        <button class="category-btn essay" onclick="filterByCategory('essay')">
-          <i class="fas fa-pen-fancy"></i> 随笔
-        </button>
-        <button class="category-btn life" onclick="filterByCategory('life')">
-          <i class="fas fa-camera-retro"></i> 生活记录
-        </button>
-
-      </div>
-
-      <!-- 博客列表 -->
-      <div class="works-list" id="worksList">
-        <!-- 博客卡片将通过JavaScript动态生成 -->
-      </div>
-    </section>
-
-    <!-- 页脚 -->
-    <footer class="footer">
-      <p>© 2025 bobo | 嵌入式Linux技术分享与生活记录</p>
-      <p style="margin-top: 6px; font-size: 13px;">愿我们在技术的道路上越走越远，生活越来越精彩～</p>
-    </footer>
-  </div>
-
-  <!-- 图片画廊弹窗（核心新增） -->
-  <div class="image-gallery" id="imageGallery">
-    <div class="gallery-container">
-      <button class="gallery-close" onclick="closeGallery()"><i class="fas fa-times"></i></button>
-      <div class="gallery-slide-container">
-        <div class="gallery-slide-wrapper" id="gallerySlideWrapper">
-          <!-- 图片将动态插入这里 -->
-        </div>
-      </div>
-      <button class="gallery-btn gallery-prev" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
-      <button class="gallery-btn gallery-next" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
-      <div class="gallery-index" id="galleryIndex">1/3</div>
-    </div>
-  </div>
-
-  <!-- 博客详情弹窗（核心优化：左侧目录+固定关闭按钮） -->
-  <div class="blog-modal" id="blogModal">
-    <div class="blog-modal-content">
-      <!-- 左侧目录区域 -->
-      <div class="blog-modal-toc" id="blogModalToc">
-        <div class="toc-title">
-          <i class="fas fa-list"></i> 文章目录
-        </div>
-        <ul class="toc-list" id="tocList">
-          <!-- 目录将动态生成 -->
-        </ul>
-      </div>
-
-      <!-- 右侧内容区域 -->
-      <div class="blog-modal-main">
-        <div class="blog-modal-header">
-          <span class="blog-modal-category" id="blogModalCategory"></span>
-          <h2 class="blog-modal-title" id="blogModalTitle"></h2>
-          <div class="blog-modal-meta">
-            <span><i class="far fa-calendar-alt"></i> <span id="blogModalDate"></span></span>
-            <span><i class="far fa-folder"></i> <span id="blogModalCategoryText"></span></span>
-          </div>
-        </div>
-        <div class="blog-modal-body" id="blogModalBody">
-          <!-- 加载状态 -->
-          <div class="blog-modal-loading">
-            <i class="fas fa-spinner"></i>
-            <p>加载中...</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- 固定关闭按钮（移到外面，确保始终可见） -->
-    <button class="blog-modal-close" onclick="closeBlogModal()"><i class="fas fa-times"></i></button>
-  </div>
-
-  <!-- 引入Markdown解析库 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
-  <!-- 引入代码高亮库 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  <script>
-       // 初始化代码高亮
-    hljs.highlightAll();
-
-    // 全局变量：当前图片画廊索引
-    let currentGalleryIndex = 0;
-    let currentGalleryImages = [];
-    let currentBlogHeadings = []; // 存储当前博客的标题列表
-
-    // 分类文本映射（用于博客详情弹窗）- 新增环境搭建映射
-    const categoryTextMap = {
-      video: '音视频内容',
-      env: 'linux运维手册',
-      note: '学习笔记',
-      essay: '随笔感悟',
-      life: '生活记录',
-    };
-
-    // 分类颜色映射（用于博客详情弹窗）
-const categoryColorMap = {
-  video: '#165DFF',
-  env: '#27AE60',
-  note: '#F7BA1E',
-  essay: '#722ED1',
-  life: '#36CFC9',
+<div class="container">
+<nav class="navbar">
+<div class="logo">bobo的快乐妙妙屋</div>
+</nav>
+<section class="profile">
+<img src="website/bobo.jpg" alt="个人头像" class="profile-avatar">
+<div class="profile-info">
+<h2 class="profile-name">bobo</h2>
+<p class="profile-desc">嵌入式Linux开发工程师 | 技术爱好者 | 生活记录者</p>
+<p class="profile-bio">你好！欢迎来到我的个人小站～ 这里记录了我在嵌入式Linux领域的学习心得、项目实践，以及生活中的点滴瞬间。希望我的分享能给你带来一点帮助，也期待和你一起交流成长！</p>
+<div>
+<strong style="color: var(--light-text); font-weight: 500;">技术栈：</strong>
+<div class="tech-stack">
+<div class="tech-item">嵌入式Linux</div>
+<div class="tech-item">C/C++</div>
+<div class="tech-item">linux应用开发</div>
+<div class="tech-item">音视频流媒体</div>
+<div class="tech-item">驱动开发</div>
+<div class="tech-item">单片机</div>
+<div class="tech-item">QT</div>
+</div>
+</div>
+<div style="margin-top: 10px;">
+<strong style="color: var(--light-text); font-weight: 500;">兴趣爱好：</strong>
+<div class="hobbies">
+<div class="hobby-item">编程</div>
+<div class="hobby-item">抽象</div>
+<div class="hobby-item">骑行</div>
+<div class="hobby-item">阅读</div>
+<div class="hobby-item">music</div>
+</div>
+</div>
+<div class="contact">
+<a href="https://github.com/liujinbo-boy" target="_blank" class="contact-item">
+<i class="fab fa-github" style="color: #333;"></i> GitHub链接
+</a>
+<a href="mailto:liujinbo1234@qq.com" target="_blank" class="contact-item">
+<i class="fas fa-envelope" style="color: #1a73e8;"></i> liujinbo1234@qq.com
+</a>
+<a target="_blank" class="contact-item">
+<i class="fab fa-qq" style="color: #1a73e8;"></i> 3225933788
+</a>
+<a target="_blank" class="contact-item">
+<i class="fab fa-weixin" style="color: #07c160;"></i> L17752785918
+</a>
+</div>
+</div>
+</section>
+<section class="works">
+<div class="works-header">
+<h2 class="works-title">我的博客作品</h2>
+<div class="blog-search-box">
+<input type="text" id="searchInput" placeholder="搜索关键词（如：驱动开发、流媒体、生活）...">
+<button onclick="searchBlogs()"><i class="fas fa-search"></i></button>
+</div>
+</div>
+<div class="category-buttons">
+<button class="category-btn all active" onclick="filterByCategory('all')">
+<i class="fas fa-th"></i> 全部
+</button>
+<button class="category-btn video" onclick="filterByCategory('video')">
+<i class="fas fa-video"></i> 音视频流媒体
+</button>
+<button class="category-btn env" onclick="filterByCategory('env')">
+<i class="fas fa-tools"></i> linux服务器运维
+</button>
+<button class="category-btn note" onclick="filterByCategory('note')">
+<i class="fas fa-book-open"></i> 学习笔记
+</button>
+<button class="category-btn essay" onclick="filterByCategory('essay')">
+<i class="fas fa-pen-fancy"></i> 随笔
+</button>
+<button class="category-btn life" onclick="filterByCategory('life')">
+<i class="fas fa-camera-retro"></i> 生活记录
+</button>
+</div>
+<div class="works-list" id="worksList"></div>
+</section>
+<footer class="footer">
+<p>© 2025 bobo | 嵌入式Linux技术分享与生活记录</p>
+<p style="margin-top: 6px; font-size: 13px;">愿我们在技术的道路上越走越远，生活越来越精彩～</p>
+</footer>
+</div>
+<div class="image-gallery" id="imageGallery">
+<div class="gallery-container">
+<button class="gallery-close" onclick="closeGallery()"><i class="fas fa-times"></i></button>
+<div class="gallery-slide-container">
+<div class="gallery-slide-wrapper" id="gallerySlideWrapper"></div>
+</div>
+<button class="gallery-btn gallery-prev" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+<button class="gallery-btn gallery-next" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+<div class="gallery-index" id="galleryIndex">1/3</div>
+</div>
+</div>
+<div class="blog-modal" id="blogModal">
+<div class="blog-modal-content">
+<div class="blog-modal-toc" id="blogModalToc">
+<div class="toc-title">
+<i class="fas fa-list"></i> 文章目录
+</div>
+<ul class="toc-list" id="tocList"></ul>
+</div>
+<div class="blog-modal-main">
+<div class="blog-modal-header">
+<span class="blog-modal-category" id="blogModalCategory"></span>
+<h2 class="blog-modal-title" id="blogModalTitle"></h2>
+<div class="blog-modal-meta">
+<span><i class="far fa-calendar-alt"></i> <span id="blogModalDate"></span></span>
+<span><i class="far fa-folder"></i> <span id="blogModalCategoryText"></span></span>
+</div>
+</div>
+<div class="blog-modal-body" id="blogModalBody">
+<div class="blog-modal-loading">
+<i class="fas fa-spinner"></i>
+<p>加载中...</p>
+</div>
+</div>
+</div>
+</div>
+<button class="blog-modal-close" onclick="closeBlogModal()"><i class="fas fa-times"></i></button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script>
+hljs.highlightAll();
+let currentGalleryIndex = 0;
+let currentGalleryImages = [];
+let currentBlogHeadings = [];
+const categoryTextMap = {
+video: '音视频内容',
+env: 'linux运维手册',
+note: '学习笔记',
+essay: '随笔感悟',
+life: '生活记录',
 };
-    const blogData = [
-      {
-        title: "HTTP、HLS与内网流服务方案",
-        excerpt: "土耳其112系统项目核心技术解析：HTTP、HLS与内网流服务方案",
-        cover: "", // 无图
-        markdown: "blog/http&stream/流媒体.md",
-        keywords: "音视频,NAT,http,hls,流媒体",
-        category: "video",
-        isImageGallery: false, // 普通文字博客
-        date: "2026-01-30" // 日期字段
-      },
-      {
-        title: "sip协议中的NAT穿透研究",
-        excerpt: "采用sip协议实现双向对讲的过程中，遇到过NAT穿透问题，以下是个人的实战经验总结",
-        cover: "", // 无图
-        markdown: "blog/sip/SIP中的NAT穿透研究.md",
-        keywords: "音视频,NAT,sip",
-        category: "video",
-        isImageGallery: false, // 普通文字博客
-        date: "2025-10-30" // 日期字段
-      },
-      {
-        title: "惠州植物园随拍",
-        excerpt: "周末闲暇时光，打卡惠州植物园",
-        cover: "good_time/picture/plant2.jpg", // 封面图
-        images: [ // 图片类博客：多张图片路径数组
-          "good_time/picture/plant2.jpg",
-          "good_time/picture/plant1.jpg",
-          "good_time/picture/plant3.jpg",
-          "good_time/picture/plant4.jpg",
-        ],
-        keywords: "生活记录,随拍,惠州植物园",
-        category: "life",
-        isImageGallery: true, // 标记为图片类博客
-        date: "2025-11-02"
-      },
-      {
-        title: "东莞东清湖湿地公园骑行",
-        excerpt: "从公司骑行到东莞，距离40km",
-        cover: "good_time/picture/IMG_20251205_154418.jpg", // 封面图
-        images: [ // 图片类博客：多张图片路径数组
-          "good_time/picture/IMG_20251205_170354.jpg",
-          "good_time/picture/IMG_20251205_154621.jpg",
-          "good_time/picture/IMG_20251205_154418.jpg",
-          "good_time/picture/IMG_20251205_154508.jpg",
-        ],
-        keywords: "生活记录,随拍,东莞,东清湖,湿地公园",
-        category: "life",
-        isImageGallery: true, // 标记为图片类博客
-        date: "2025-12-05"
-      },
-      {
-        title: "网络编程学习笔记",
-        excerpt: "底层socket套接字接口的介绍和使用，包括TCP/UDP通信、并发处理等核心知识点",
-        cover: "", // 无图
-        markdown: "note/网络编程.md",
-        keywords: "网络编程,笔记,socket,TCP,UDP",
-        category: "note",
-        isImageGallery: false,
-        date: "2025-10-30" 
-      },
-      {
-        title: "linux系统编程学习笔记",
-        excerpt: "入门linux应用开发的笔记，涵盖文件IO、进程管理、线程同步、信号处理等内容",
-        cover: "", // 无图
-        markdown: "note/linux系统编程.md",
-        keywords: "linux,系统编程,笔记,进程,线程",
-        category: "note",
-        isImageGallery: false, 
-        date: "2025-10-30" 
-      },
-      {
-        title: "Linux服务器维护常用命令",
-        excerpt: "记录了大部分的常用命令,内容有：用户与用户组管理，文件权限与归属管理，文件操作管理，存储与挂载管理，网络管理，进程管理，方便查询,",
-        cover: "", // 无图
-        markdown: "note/Linux服务器维护常用命令.md",
-        keywords: "linux,运维,手册,命令大全,",
-        category: "env",
-        isImageGallery: false, 
-        date: "2026-01-30" 
-      },
-      {
-        title: "linux服务器运维指南",
-        excerpt: "Linux服务器运维指南,包括用户管理、samba服务、nfs服务等,内容持续更新",
-        cover: "", 
-        markdown: "note/linux服务器运维手册.md",
-        keywords: "环境搭建,Ubuntu,运维,nfs,samba",
-        category: "env",
-        isImageGallery: false,
-        date: "2025-10-22"
-      }
-    ];
-
-    // 生成博客卡片（适配普通博客/图片类博客
-    function renderBlogCards(blogs) {
-      const worksList = document.getElementById('worksList');
-      worksList.innerHTML = '';
-      
-      if (blogs.length === 0) {
-        worksList.innerHTML = `
-          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--light-text); background-color: var(--card-bg); border-radius: 10px; box-shadow: var(--card-shadow);">
-            <i class="fas fa-search" style="font-size: 36px; margin-bottom: 15px; color: #ddd;"></i>
-            <p style="font-size: 16px; margin-bottom: 8px;">暂无匹配的博客~</p>
-            <p style="font-size: 14px;">试试更换关键词或分类吧</p>
-          </div>
-        `;
-        return;
-      }
-
-      blogs.forEach(blog => {
-        const card = document.createElement('div');
-        card.className = 'work-card';
-        
-        // 分类对应的图标（用于无图占位区）- 新增环境搭建图标
-        const categoryIconMap = {
-          video: 'fas fa-video',
-          essay: 'fas fa-pen-fancy',
-          note: 'fas fa-book-open',
-          life: 'fas fa-camera-retro',
-          env: 'fas fa-tools' // 新增环境搭建图标
-        };
-
-        // 动态生成卡片内容（区分普通博客/图片类博客）
-        let cardContent = '';
-        if (blog.cover) {
-          // 有封面图（普通博客/图片类博客共用）
-          cardContent = `
-            <img src="${blog.cover}" alt="${blog.title}" class="work-img">
-            <div class="work-content">
-              <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
-              <h3 class="work-title">
-                ${blog.title}
-                ${blog.isImageGallery ? '<span class="image-gallery-tag"><i class="fas fa-images"></i> 多图</span>' : ''}
-              </h3>
-              <p class="work-excerpt">${blog.excerpt}</p>
-              ${blog.isImageGallery ? '' : '<div class="work-link" onclick="openBlogModal(this)" data-blog-index="' + blogData.indexOf(blog) + '">阅读全文 <i class="fas fa-arrow-right"></i></div>'}
-            </div>
-          `;
-        } else {
-          // 无封面图（普通博客）
-          cardContent = `
-            <div class="work-img-placeholder ${blog.category}">
-              <i class="${categoryIconMap[blog.category]}"></i>
-              <span>${categoryTextMap[blog.category]}</span>
-            </div>
-            <div class="work-content">
-              <span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
-              <h3 class="work-title">${blog.title}</h3>
-              <p class="work-excerpt">${blog.excerpt}</p>
-              <div class="work-link" onclick="openBlogModal(this)" data-blog-index="${blogData.indexOf(blog)}">阅读全文 <i class="fas fa-arrow-right"></i></div>
-            </div>
-          `;
-        }
-
-        card.innerHTML = cardContent;
-
-        // 绑定点击事件（图片类博客打开画廊，普通博客点击"阅读全文"打开弹窗）
-        if (blog.isImageGallery) {
-          card.onclick = function() {
-            openGallery(blog.images);
-          };
-        } else {
-          // 普通博客：卡片其他区域不响应点击，只有"阅读全文"可点击
-          card.style.cursor = 'default';
-        }
-
-        worksList.appendChild(card);
-      });
-    }
-
-    // 打开图片画廊（核心功能）
-    function openGallery(images) {
-      currentGalleryImages = images;
-      currentGalleryIndex = 0;
-      
-      const galleryWrapper = document.getElementById('gallerySlideWrapper');
-      const galleryIndex = document.getElementById('galleryIndex');
-      
-      // 清空画廊内容
-      galleryWrapper.innerHTML = '';
-      
-      // 插入所有图片
-      images.forEach(imgSrc => {
-        const slideItem = document.createElement('div');
-        slideItem.className = 'gallery-slide-item';
-        slideItem.innerHTML = `<img src="${imgSrc}" alt="画廊图片" class="gallery-img">`;
-        galleryWrapper.appendChild(slideItem);
-      });
-      
-      // 更新索引
-      galleryIndex.textContent = `${currentGalleryIndex + 1}/${images.length}`;
-      
-      // 显示画廊
-      document.getElementById('imageGallery').classList.add('gallery-active');
-      
-      // 禁止页面滚动
-      document.body.style.overflow = 'hidden';
-    }
-
-    // 关闭图片画廊（核心功能）
-    function closeGallery() {
-      document.getElementById('imageGallery').classList.remove('gallery-active');
-      document.body.style.overflow = 'auto'; // 恢复页面滚动
-    }
-
-    // 上一张图片（核心功能）
-    function prevSlide() {
-      if (currentGalleryIndex > 0) {
-        currentGalleryIndex--;
-        updateGallerySlide();
-      }
-    }
-
-    // 下一张图片（核心功能）
-    function nextSlide() {
-      if (currentGalleryIndex < currentGalleryImages.length - 1) {
-        currentGalleryIndex++;
-        updateGallerySlide();
-      }
-    }
-
-    // 更新画廊滑动位置（核心功能）
-    function updateGallerySlide() {
-      const galleryWrapper = document.getElementById('gallerySlideWrapper');
-      const galleryIndex = document.getElementById('galleryIndex');
-      const slideWidth = galleryWrapper.clientWidth;
-      
-      // 滑动到对应图片
-      galleryWrapper.style.transform = `translateX(-${currentGalleryIndex * slideWidth}px)`;
-      
-      // 更新索引
-      galleryIndex.textContent = `${currentGalleryIndex + 1}/${currentGalleryImages.length}`;
-    }
-
-    // 触摸滑动支持（核心功能）
-    let touchStartX = 0;
-    let touchEndX = 0;
-    
-    const galleryContainer = document.querySelector('.gallery-container');
-    galleryContainer.addEventListener('touchstart', function(e) {
-      touchStartX = e.touches[0].clientX;
-    });
-    
-    galleryContainer.addEventListener('touchend', function(e) {
-      touchEndX = e.changedTouches[0].clientX;
-      const touchDiff = touchEndX - touchStartX;
-      
-      // 滑动距离超过50px才触发切换
-      if (touchDiff > 50) {
-        prevSlide(); // 向右滑：上一张
-      } else if (touchDiff < -50) {
-        nextSlide(); // 向左滑：下一张
-      }
-    });
-
-    // 点击遮罩关闭画廊
-    document.getElementById('imageGallery').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeGallery();
-      }
-    });
-
-    // 生成文章目录（核心新增）
-    function generateToc(headings) {
-      const tocList = document.getElementById('tocList');
-      tocList.innerHTML = '';
-      currentBlogHeadings = headings;
-
-      if (headings.length === 0) {
-        tocList.innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">无目录结构</a></li>';
-        return;
-      }
-
-      headings.forEach(heading => {
-        const li = document.createElement('li');
-        li.className = `toc-item toc-level-${heading.level}`;
-        
-        const a = document.createElement('a');
-        a.className = 'toc-link';
-        a.href = `#${heading.id}`;
-        a.textContent = heading.text;
-        
-        // 平滑滚动
-        a.addEventListener('click', function(e) {
-          e.preventDefault();
-          const target = document.getElementById(heading.id);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
-        });
-        
-        li.appendChild(a);
-        tocList.appendChild(li);
-      });
-    }
-
-    // 监听滚动，更新当前激活的目录项（核心新增）
-    function setupScrollSpy() {
-      const blogBody = document.getElementById('blogModalBody');
-      
-      blogBody.addEventListener('scroll', function() {
-        const scrollTop = blogBody.scrollTop;
-        const activeIndex = currentBlogHeadings.findIndex((heading, index) => {
-          const element = document.getElementById(heading.id);
-          if (!element) return false;
-          
-          const offsetTop = element.offsetTop - 30; // 偏移量
-          const nextOffsetTop = index < currentBlogHeadings.length - 1 
-            ? (document.getElementById(currentBlogHeadings[index + 1].id)?.offsetTop || Infinity) - 30
-            : Infinity;
-          
-          return scrollTop >= offsetTop && scrollTop < nextOffsetTop;
-        });
-        
-        // 更新目录激活状态
-        document.querySelectorAll('.toc-link').forEach((link, index) => {
-          if (index === activeIndex) {
-            link.classList.add('active');
-          } else {
-            link.classList.remove('active');
-          }
-        });
-      });
-    }
-
-    // 解析MD内容，提取标题（核心优化：兼容特殊格式标题）
+const categoryColorMap = {
+video: '#165DFF',
+env: '#27AE60',
+note: '#F7BA1E',
+essay: '#722ED1',
+life: '#36CFC9',
+};
+const blogData = [
+{
+title: "HTTP、HLS与内网流服务方案",
+excerpt: "土耳其112系统项目核心技术解析：HTTP、HLS与内网流服务方案",
+cover: "",
+markdown: "blog/http&stream/流媒体.md",
+keywords: "音视频,NAT,http,hls,流媒体",
+category: "video",
+isImageGallery: false,
+date: "2026-01-30"
+},
+{
+title: "sip协议中的NAT穿透研究",
+excerpt: "采用sip协议实现双向对讲的过程中，遇到过NAT穿透问题，以下是个人的实战经验总结",
+cover: "",
+markdown: "blog/sip/SIP中的NAT穿透研究.md",
+keywords: "音视频,NAT,sip",
+category: "video",
+isImageGallery: false,
+date: "2025-10-30"
+},
+{
+title: "惠州植物园随拍",
+excerpt: "周末闲暇时光，打卡惠州植物园",
+cover: "good_time/picture/plant2.jpg",
+images: [
+"good_time/picture/plant2.jpg",
+"good_time/picture/plant1.jpg",
+"good_time/picture/plant3.jpg",
+"good_time/picture/plant4.jpg",
+],
+keywords: "生活记录,随拍,惠州植物园",
+category: "life",
+isImageGallery: true,
+date: "2025-11-02"
+},
+{
+title: "东莞东清湖湿地公园骑行",
+excerpt: "从公司骑行到东莞，距离40km",
+cover: "good_time/picture/IMG_20251205_154418.jpg",
+images: [
+"good_time/picture/IMG_20251205_170354.jpg",
+"good_time/picture/IMG_20251205_154621.jpg",
+"good_time/picture/IMG_20251205_154418.jpg",
+"good_time/picture/IMG_20251205_154508.jpg",
+],
+keywords: "生活记录,随拍,东莞,东清湖,湿地公园",
+category: "life",
+isImageGallery: true,
+date: "2025-12-05"
+},
+{
+title: "网络编程学习笔记",
+excerpt: "底层socket套接字接口的介绍和使用，包括TCP/UDP通信、并发处理等核心知识点",
+cover: "",
+markdown: "note/网络编程.md",
+keywords: "网络编程,笔记,socket,TCP,UDP",
+category: "note",
+isImageGallery: false,
+date: "2025-10-30"
+},
+{
+title: "linux系统编程学习笔记",
+excerpt: "入门linux应用开发的笔记，涵盖文件IO、进程管理、线程同步、信号处理等内容",
+cover: "",
+markdown: "note/linux系统编程.md",
+keywords: "linux,系统编程,笔记,进程,线程",
+category: "note",
+isImageGallery: false,
+date: "2025-10-30"
+},
+{
+title: "Linux服务器维护常用命令",
+excerpt: "记录了大部分的常用命令,内容有：用户与用户组管理，文件权限与归属管理，文件操作管理，存储与挂载管理，网络管理，进程管理，方便查询,",
+cover: "",
+markdown: "note/Linux服务器维护常用命令.md",
+keywords: "linux,运维,手册,命令大全,",
+category: "env",
+isImageGallery: false,
+date: "2026-01-30"
+},
+{
+title: "linux服务器运维指南",
+excerpt: "Linux服务器运维指南,包括用户管理、samba服务、nfs服务等,内容持续更新",
+cover: "",
+markdown: "note/linux服务器运维手册.md",
+keywords: "环境搭建,Ubuntu,运维,nfs,samba",
+category: "env",
+isImageGallery: false,
+date: "2025-10-22"
+}
+];
+function renderBlogCards(blogs) {
+const worksList = document.getElementById('worksList');
+worksList.innerHTML = '';
+if (blogs.length === 0) {
+worksList.innerHTML = `
+<div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--light-text); background-color: var(--card-bg); border-radius: 10px; box-shadow: var(--card-shadow);">
+<i class="fas fa-search" style="font-size: 36px; margin-bottom: 15px; color: #ddd;"></i>
+<p style="font-size: 16px; margin-bottom: 8px;">暂无匹配的博客~</p>
+<p style="font-size: 14px;">试试更换关键词或分类吧</p>
+</div>
+`;
+return;
+}
+blogs.forEach(blog => {
+const card = document.createElement('div');
+card.className = 'work-card';
+const categoryIconMap = {
+video: 'fas fa-video',
+essay: 'fas fa-pen-fancy',
+note: 'fas fa-book-open',
+life: 'fas fa-camera-retro',
+env: 'fas fa-tools'
+};
+let cardContent = '';
+if (blog.cover) {
+cardContent = `
+<img src="${blog.cover}" alt="${blog.title}" class="work-img">
+<div class="work-content">
+<span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
+<h3 class="work-title">
+${blog.title}
+${blog.isImageGallery ? '<span class="image-gallery-tag"><i class="fas fa-images"></i> 多图</span>' : ''}
+</h3>
+<p class="work-excerpt">${blog.excerpt}</p>
+${blog.isImageGallery ? '' : '<div class="work-link" onclick="openBlogModal(this)" data-blog-index="' + blogData.indexOf(blog) + '">阅读全文 <i class="fas fa-arrow-right"></i></div>'}
+</div>
+`;
+} else {
+cardContent = `
+<div class="work-img-placeholder ${blog.category}">
+<i class="${categoryIconMap[blog.category]}"></i>
+<span>${categoryTextMap[blog.category]}</span>
+</div>
+<div class="work-content">
+<span class="work-category ${blog.category}">${categoryTextMap[blog.category]}</span>
+<h3 class="work-title">${blog.title}</h3>
+<p class="work-excerpt">${blog.excerpt}</p>
+<div class="work-link" onclick="openBlogModal(this)" data-blog-index="${blogData.indexOf(blog)}">阅读全文 <i class="fas fa-arrow-right"></i></div>
+</div>
+`;
+}
+card.innerHTML = cardContent;
+if (blog.isImageGallery) {
+card.onclick = function() {
+openGallery(blog.images);
+};
+} else {
+card.style.cursor = 'default';
+}
+worksList.appendChild(card);
+});
+}
+function openGallery(images) {
+currentGalleryImages = images;
+currentGalleryIndex = 0;
+const galleryWrapper = document.getElementById('gallerySlideWrapper');
+const galleryIndex = document.getElementById('galleryIndex');
+galleryWrapper.innerHTML = '';
+images.forEach(imgSrc => {
+const slideItem = document.createElement('div');
+slideItem.className = 'gallery-slide-item';
+slideItem.innerHTML = `<img src="${imgSrc}" alt="画廊图片" class="gallery-img">`;
+galleryWrapper.appendChild(slideItem);
+});
+galleryIndex.textContent = `${currentGalleryIndex + 1}/${images.length}`;
+document.getElementById('imageGallery').classList.add('gallery-active');
+document.body.style.overflow = 'hidden';
+}
+function closeGallery() {
+document.getElementById('imageGallery').classList.remove('gallery-active');
+document.body.style.overflow = 'auto';
+}
+function prevSlide() {
+if (currentGalleryIndex > 0) {
+currentGalleryIndex--;
+updateGallerySlide();
+}
+}
+function nextSlide() {
+if (currentGalleryIndex < currentGalleryImages.length - 1) {
+currentGalleryIndex++;
+updateGallerySlide();
+}
+}
+function updateGallerySlide() {
+const galleryWrapper = document.getElementById('gallerySlideWrapper');
+const galleryIndex = document.getElementById('galleryIndex');
+const slideWidth = galleryWrapper.clientWidth;
+galleryWrapper.style.transform = `translateX(-${currentGalleryIndex * slideWidth}px)`;
+galleryIndex.textContent = `${currentGalleryIndex + 1}/${currentGalleryImages.length}`;
+}
+let touchStartX = 0;
+let touchEndX = 0;
+const galleryContainer = document.querySelector('.gallery-container');
+galleryContainer.addEventListener('touchstart', function(e) {
+touchStartX = e.touches[0].clientX;
+});
+galleryContainer.addEventListener('touchend', function(e) {
+touchEndX = e.changedTouches[0].clientX;
+const touchDiff = touchEndX - touchStartX;
+if (touchDiff > 50) {
+prevSlide();
+} else if (touchDiff < -50) {
+nextSlide();
+}
+});
+document.getElementById('imageGallery').addEventListener('click', function(e) {
+if (e.target === this) {
+closeGallery();
+}
+});
+function generateToc(headings) {
+const tocList = document.getElementById('tocList');
+tocList.innerHTML = '';
+currentBlogHeadings = headings;
+if (headings.length === 0) {
+tocList.innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">无目录结构</a></li>';
+return;
+}
+headings.forEach(heading => {
+const li = document.createElement('li');
+li.className = `toc-item toc-level-${heading.level}`;
+const a = document.createElement('a');
+a.className = 'toc-link';
+a.href = `#${heading.id}`;
+a.textContent = heading.text;
+a.addEventListener('click', function(e) {
+e.preventDefault();
+const target = document.getElementById(heading.id);
+if (target) {
+target.scrollIntoView({ behavior: 'smooth' });
+}
+});
+li.appendChild(a);
+tocList.appendChild(li);
+});
+}
+function setupScrollSpy() {
+const blogBody = document.getElementById('blogModalBody');
+blogBody.addEventListener('scroll', function() {
+const scrollTop = blogBody.scrollTop;
+const activeIndex = currentBlogHeadings.findIndex((heading, index) => {
+const element = document.getElementById(heading.id);
+if (!element) return false;
+const offsetTop = element.offsetTop - 30;
+const nextOffsetTop = index < currentBlogHeadings.length - 1
+? (document.getElementById(currentBlogHeadings[index + 1].id)?.offsetTop || Infinity) - 30
+: Infinity;
+return scrollTop >= offsetTop && scrollTop < nextOffsetTop;
+});
+document.querySelectorAll('.toc-link').forEach((link, index) => {
+if (index === activeIndex) {
+link.classList.add('active');
+} else {
+link.classList.remove('active');
+}
+});
+});
+}
 function parseHeadingsFromMd(markdownContent) {
-  const lines = markdownContent.split('\n');
-  let inCodeBlock = false;
-  const headings = [];
-  let headingId = 1;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    // 检查代码块开始/结束（处理带语言标识的情况）
-    if (line.startsWith('```')) {
-      inCodeBlock = !inCodeBlock;
-      continue;
-    }
-    
-    // 跳过代码块内的所有内容
-    if (inCodeBlock) continue;
-    
-    // 仅匹配标准Markdown标题（#后必须有空格）
-    const headingMatch = line.match(/^#{1,6} (.+)/);
-    if (headingMatch) {
-      const level = headingMatch[0].trim().split(' ')[0].length;
-      const text = headingMatch[1].trim();
-      const id = `heading-${headingId++}`;
-      
-      // 跳过空标题
-      if (text) {
-        headings.push({ level, text, id });
-      }
-    }
-  }
-  
-  return headings;
+const lines = markdownContent.split('\n');
+let inCodeBlock = false;
+const headings = [];
+let headingId = 1;
+for (let i = 0; i < lines.length; i++) {
+const line = lines[i].trim();
+if (line.startsWith('```')) {
+inCodeBlock = !inCodeBlock;
+continue;
 }
-
-
-    // 替换MD内容中的标题，添加ID（核心优化：容错处理）
-    
-// 添加正则转义函数
+if (inCodeBlock) continue;
+const headingMatch = line.match(/^#{1,6} (.+)/);
+if (headingMatch) {
+const level = headingMatch[0].trim().split(' ')[0].length;
+const text = headingMatch[1].trim();
+const id = `heading-${headingId++}`;
+if (text) {
+headings.push({ level, text, id });
+}
+}
+}
+return headings;
+}
 function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-
-// 替换原有的 addIdsToHeadings 函数
 function addIdsToHeadings(markdownContent, headings) {
-  let modifiedMd = markdownContent;
-  
-  try {
-    headings.forEach(heading => {
-      const headingMark = '#'.repeat(heading.level);
-      
-      // 安全转义标题文本中的正则特殊字符
-      const escapedText = escapeRegExp(heading.text);
-      
-      // 构建精确匹配的正则（要求标题行必须以#开头，后跟空格，且整行匹配）
-      const regex = new RegExp(
-        `^(${headingMark})\\s+(${escapedText})\\s*$`, 
-        'gm'
-      );
-      
-      // 替换为带ID的标题
-      modifiedMd = modifiedMd.replace(
-        regex, 
-        `$1 <span id="${heading.id}">$2</span>`
-      );
-    });
-  } catch (error) {
-    console.error('添加标题ID失败：', error);
-    return markdownContent;
-  }
-  
-  return modifiedMd;
+let modifiedMd = markdownContent;
+try {
+headings.forEach(heading => {
+const headingMark = '#'.repeat(heading.level);
+const escapedText = escapeRegExp(heading.text);
+const regex = new RegExp(
+`^(${headingMark})\\s+(${escapedText})\\s*$`,
+'gm'
+);
+modifiedMd = modifiedMd.replace(
+regex,
+`$1 <span id="${heading.id}">$2</span>`
+);
+});
+} catch (error) {
+console.error('添加标题ID失败：', error);
+return markdownContent;
 }
-
-    // 打开博客详情弹窗（核心优化：增加错误排查和兜底）
-    function openBlogModal(elem) {
-      const blogIndex = elem.getAttribute('data-blog-index');
-      const blog = blogData[blogIndex];
-      
-      // 填充弹窗头部信息
-      const modalCategory = document.getElementById('blogModalCategory');
-      const modalTitle = document.getElementById('blogModalTitle');
-      const modalCategoryText = document.getElementById('blogModalCategoryText');
-      const modalDate = document.getElementById('blogModalDate');
-      const modalBody = document.getElementById('blogModalBody');
-      
-      // 设置分类标签颜色和文本
-      modalCategory.textContent = categoryTextMap[blog.category];
-      modalCategory.style.backgroundColor = categoryColorMap[blog.category];
-      modalTitle.textContent = blog.title;
-      modalCategoryText.textContent = categoryTextMap[blog.category];
-      modalDate.textContent = formatDate(blog.date);
-      
-      // 显示加载状态
-      modalBody.innerHTML = `
-        <div class="blog-modal-loading">
-          <i class="fas fa-spinner"></i>
-          <p>加载中...</p>
-        </div>
-      `;
-      
-      // 显示弹窗
-      document.getElementById('blogModal').classList.add('blog-modal-active');
-      document.body.style.overflow = 'hidden';
-      
-      // 加载并解析MD文件（增加详细日志）
-      fetch(blog.markdown)
-        .then(response => {
-          console.log('请求状态：', response.status, response.statusText);
-          console.log('请求URL：', blog.markdown);
-          if (!response.ok) {
-            throw new Error(`HTTP错误，状态码：${response.status}`);
-          }
-          return response.text();
-        })
-        .then(markdownContent => {
-          console.log('MD文件加载成功，内容长度：', markdownContent.length);
-          
-          // 1. 提取标题（容错：解析失败也继续）
-          const headings = parseHeadingsFromMd(markdownContent);
-          
-          // 2. 为标题添加ID（容错）
-          const modifiedMd = addIdsToHeadings(markdownContent, headings);
-          
-          // 3. 解析MD为HTML（增加异常捕获）
-          let htmlContent = '';
-          try {
-            htmlContent = marked.parse(modifiedMd);
-            console.log('MD解析为HTML成功');
-          } catch (parseError) {
-            console.error('MD解析失败：', parseError);
-            // 解析失败时直接显示原始文本（格式化处理）
-            htmlContent = `<pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">${markdownContent}</pre>`;
-          }
-          
-          // 4. 渲染正文
-          modalBody.innerHTML = htmlContent;
-          
-          // 5. 生成目录（即使失败也不影响正文）
-          try {
-            generateToc(headings);
-            setupScrollSpy();
-          } catch (tocError) {
-            console.error('目录生成失败：', tocError);
-            document.getElementById('tocList').innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">目录生成失败</a></li>';
-          }
-          
-          // 6. 代码高亮（增加异常捕获）
-          try {
-            hljs.highlightAll();
-            console.log('代码高亮成功');
-          } catch (highlightError) {
-            console.error('代码高亮失败：', highlightError);
-            // 高亮失败不影响正文显示
-          }
-        })
-        .catch(error => {
-          // 显示详细错误信息
-          modalBody.innerHTML = `
-            <div class="blog-modal-error">
-              <i class="fas fa-exclamation-circle"></i>
-              <p>博客加载失败</p>
-              <p style="margin-top: 8px; font-size: 14px; color: #ff4d4f;">错误详情：${error.message}</p>
-              <p style="margin-top: 8px; font-size: 13px; color: #999;">文件路径：${blog.markdown}</p>
-              <button onclick="reloadBlogModal(${blogIndex})">重试</button>
-            </div>
-          `;
-          console.error('MD文件加载全流程失败：', error);
-        });
-    }
-
-    // 关闭博客详情弹窗（核心优化）
-    function closeBlogModal() {
-      document.getElementById('blogModal').classList.remove('blog-modal-active');
-      document.body.style.overflow = 'auto';
-      currentBlogHeadings = [];
-    }
-
-    // 重试加载博客（核心新增）
-    function reloadBlogModal(blogIndex) {
-      const blog = blogData[blogIndex];
-      const modalBody = document.getElementById('blogModalBody');
-      
-      modalBody.innerHTML = `
-        <div class="blog-modal-loading">
-          <i class="fas fa-spinner"></i>
-          <p>重新加载中...</p>
-        </div>
-      `;
-      
-      fetch(blog.markdown)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP错误，状态码：${response.status}`);
-          }
-          return response.text();
-        })
-        .then(markdownContent => {
-          const headings = parseHeadingsFromMd(markdownContent);
-          const modifiedMd = addIdsToHeadings(markdownContent, headings);
-          
-          let htmlContent = '';
-          try {
-            htmlContent = marked.parse(modifiedMd);
-          } catch (parseError) {
-            console.error('重试时MD解析失败：', parseError);
-            htmlContent = `<pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">${markdownContent}</pre>`;
-          }
-          
-          modalBody.innerHTML = htmlContent;
-          
-          try {
-            generateToc(headings);
-            setupScrollSpy();
-          } catch (tocError) {
-            document.getElementById('tocList').innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">目录生成失败</a></li>';
-          }
-          
-          try {
-            hljs.highlightAll();
-          } catch (highlightError) {
-            console.error('重试时代码高亮失败：', highlightError);
-          }
-        })
-        .catch(error => {
-          modalBody.innerHTML = `
-            <div class="blog-modal-error">
-              <i class="fas fa-exclamation-circle"></i>
-              <p>仍然加载失败</p>
-              <p style="margin-top: 8px; font-size: 14px; color: #ff4d4f;">错误详情：${error.message}</p>
-              <p style="margin-top: 8px; font-size: 13px; color: #999;">文件路径：${blog.markdown}</p>
-              <button onclick="reloadBlogModal(${blogIndex})">再次重试</button>
-            </div>
-          `;
-          console.error('MD文件重新加载失败：', error);
-        });
-    }
-
-    // 分类过滤功能
-    function filterByCategory(category) {
-      // 更新按钮激活状态
-      document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`.category-btn.${category}`).classList.add('active');
-      
-      // 过滤博客
-      let filteredBlogs = blogData;
-      if (category !== 'all') {
-        filteredBlogs = blogData.filter(blog => blog.category === category);
-      }
-      renderBlogCards(filteredBlogs);
-    }
-
-    // 搜索功能
-    function searchBlogs() {
-      const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
-      const activeCategory = document.querySelector('.category-btn.active').classList[1];
-      
-      let filteredBlogs = blogData;
-      // 先按分类过滤
-      if (activeCategory !== 'all') {
-        filteredBlogs = filteredBlogs.filter(blog => blog.category === activeCategory);
-      }
-      // 再按关键词过滤
-      if (searchInput) {
-        filteredBlogs = filteredBlogs.filter(blog => 
-          blog.title.toLowerCase().includes(searchInput) || 
-          blog.keywords.toLowerCase().includes(searchInput) ||
-          blog.excerpt.toLowerCase().includes(searchInput)
-        );
-      }
-      renderBlogCards(filteredBlogs);
-    }
-
-    // 回车键搜索
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-      if (e.key === 'Enter') {
-        searchBlogs();
-      }
-    });
-
-    // 窗口大小变化时更新画廊
-    window.addEventListener('resize', function() {
-      if (document.getElementById('imageGallery').classList.contains('gallery-active')) {
-        updateGallerySlide();
-      }
-    });
-
-    // 日期格式化函数（新增）
-    function formatDate(dateStr) {
-      const date = new Date(dateStr);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}年${month}月${day}日`;
-    }
-    // 初始渲染所有博客
-    renderBlogCards(blogData);
-  </script>
+return modifiedMd;
+}
+function openBlogModal(elem) {
+const blogIndex = elem.getAttribute('data-blog-index');
+const blog = blogData[blogIndex];
+const modalCategory = document.getElementById('blogModalCategory');
+const modalTitle = document.getElementById('blogModalTitle');
+const modalCategoryText = document.getElementById('blogModalCategoryText');
+const modalDate = document.getElementById('blogModalDate');
+const modalBody = document.getElementById('blogModalBody');
+modalCategory.textContent = categoryTextMap[blog.category];
+modalCategory.style.backgroundColor = categoryColorMap[blog.category];
+modalTitle.textContent = blog.title;
+modalCategoryText.textContent = categoryTextMap[blog.category];
+modalDate.textContent = formatDate(blog.date);
+modalBody.innerHTML = `
+<div class="blog-modal-loading">
+<i class="fas fa-spinner"></i>
+<p>加载中...</p>
+</div>
+`;
+document.getElementById('blogModal').classList.add('blog-modal-active');
+document.body.style.overflow = 'hidden';
+fetch(blog.markdown)
+.then(response => {
+if (!response.ok) {
+throw new Error(`HTTP错误，状态码：${response.status}`);
+}
+return response.text();
+})
+.then(markdownContent => {
+const headings = parseHeadingsFromMd(markdownContent);
+const modifiedMd = addIdsToHeadings(markdownContent, headings);
+let htmlContent = '';
+try {
+htmlContent = marked.parse(modifiedMd);
+} catch (parseError) {
+htmlContent = `<pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">${markdownContent}</pre>`;
+}
+modalBody.innerHTML = htmlContent;
+try {
+generateToc(headings);
+setupScrollSpy();
+} catch (tocError) {
+document.getElementById('tocList').innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">目录生成失败</a></li>';
+}
+try {
+hljs.highlightAll();
+} catch (highlightError) {
+console.error('代码高亮失败：', highlightError);
+}
+})
+.catch(error => {
+modalBody.innerHTML = `
+<div class="blog-modal-error">
+<i class="fas fa-exclamation-circle"></i>
+<p>博客加载失败</p>
+<p style="margin-top: 8px; font-size: 14px; color: #ff4d4f;">错误详情：${error.message}</p>
+<p style="margin-top: 8px; font-size: 13px; color: #999;">文件路径：${blog.markdown}</p>
+<button onclick="reloadBlogModal(${blogIndex})">重试</button>
+</div>
+`;
+console.error('MD文件加载全流程失败：', error);
+});
+}
+function closeBlogModal() {
+document.getElementById('blogModal').classList.remove('blog-modal-active');
+document.body.style.overflow = 'auto';
+currentBlogHeadings = [];
+}
+function reloadBlogModal(blogIndex) {
+const blog = blogData[blogIndex];
+const modalBody = document.getElementById('blogModalBody');
+modalBody.innerHTML = `
+<div class="blog-modal-loading">
+<i class="fas fa-spinner"></i>
+<p>重新加载中...</p>
+</div>
+`;
+fetch(blog.markdown)
+.then(response => {
+if (!response.ok) {
+throw new Error(`HTTP错误，状态码：${response.status}`);
+}
+return response.text();
+})
+.then(markdownContent => {
+const headings = parseHeadingsFromMd(markdownContent);
+const modifiedMd = addIdsToHeadings(markdownContent, headings);
+let htmlContent = '';
+try {
+htmlContent = marked.parse(modifiedMd);
+} catch (parseError) {
+htmlContent = `<pre style="background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto;">${markdownContent}</pre>`;
+}
+modalBody.innerHTML = htmlContent;
+try {
+generateToc(headings);
+setupScrollSpy();
+} catch (tocError) {
+document.getElementById('tocList').innerHTML = '<li class="toc-item"><a class="toc-link" style="color: #999; cursor: default;">目录生成失败</a></li>';
+}
+try {
+hljs.highlightAll();
+} catch (highlightError) {
+console.error('重试时代码高亮失败：', highlightError);
+}
+})
+.catch(error => {
+modalBody.innerHTML = `
+<div class="blog-modal-error">
+<i class="fas fa-exclamation-circle"></i>
+<p>仍然加载失败</p>
+<p style="margin-top: 8px; font-size: 14px; color: #ff4d4f;">错误详情：${error.message}</p>
+<p style="margin-top: 8px; font-size: 13px; color: #999;">文件路径：${blog.markdown}</p>
+<button onclick="reloadBlogModal(${blogIndex})">再次重试</button>
+</div>
+`;
+console.error('MD文件重新加载失败：', error);
+});
+}
+function filterByCategory(category) {
+document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelector(`.category-btn.${category}`).classList.add('active');
+let filteredBlogs = blogData;
+if (category !== 'all') {
+filteredBlogs = blogData.filter(blog => blog.category === category);
+}
+renderBlogCards(filteredBlogs);
+}
+function searchBlogs() {
+const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
+const activeCategory = document.querySelector('.category-btn.active').classList[1];
+let filteredBlogs = blogData;
+if (activeCategory !== 'all') {
+filteredBlogs = filteredBlogs.filter(blog => blog.category === activeCategory);
+}
+if (searchInput) {
+filteredBlogs = filteredBlogs.filter(blog =>
+blog.title.toLowerCase().includes(searchInput) ||
+blog.keywords.toLowerCase().includes(searchInput) ||
+blog.excerpt.toLowerCase().includes(searchInput)
+);
+}
+renderBlogCards(filteredBlogs);
+}
+document.getElementById('searchInput').addEventListener('keyup', function(e) {
+if (e.key === 'Enter') {
+searchBlogs();
+}
+});
+window.addEventListener('resize', function() {
+if (document.getElementById('imageGallery').classList.contains('gallery-active')) {
+updateGallerySlide();
+}
+});
+function formatDate(dateStr) {
+const date = new Date(dateStr);
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0');
+const day = String(date.getDate()).padStart(2, '0');
+return `${year}年${month}月${day}日`;
+}
+renderBlogCards(blogData);
+</script>
 </body>
 </html>
