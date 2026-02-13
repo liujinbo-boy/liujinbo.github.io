@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+parseHeadingsFromMd<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -1321,28 +1321,44 @@ link.classList.remove('active');
 });
 }
 function parseHeadingsFromMd(markdownContent) {
-const lines = markdownContent.split('\n');
-let inCodeBlock = false;
-const headings = [];
-let headingId = 1;
-for (let i = 0; i < lines.length; i++) {
-const line = lines[i].trim();
-if (line.startsWith('```')) {
-inCodeBlock = !inCodeBlock;
-continue;
-}
-if (inCodeBlock) continue;
-const headingMatch = line.match(/^#{1,6} (.+)/);
-if (headingMatch) {
-const level = headingMatch[0].trim().split(' ')[0].length;
-const text = headingMatch[1].trim();
-const id = `heading-${headingId++}`;
-if (text) {
-headings.push({ level, text, id });
-}
-}
-}
-return headings;
+  const lines = markdownContent.split('\n');
+  let inCodeBlock = false;
+  const headings = [];
+  let headingId = 1;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (inCodeBlock) continue;
+    
+    // 添加对中文标题格式的匹配
+    const chineseHeadingMatch = line.match(/^([一二三四五六七八九十]+、)(.+)/);
+    const markdownHeadingMatch = line.match(/^#{1,6} (.+)/);
+    
+    let headingMatch, level, text;
+    
+    if (chineseHeadingMatch) {
+      // 中文标题格式
+      level = 1; // 中文标题统一视为一级标题
+      text = chineseHeadingMatch[0].trim();
+    } else if (markdownHeadingMatch) {
+      // 标准Markdown标题
+      level = markdownHeadingMatch[0].trim().split(' ')[0].length;
+      text = markdownHeadingMatch[1].trim();
+    }
+    
+    if (text) {
+      headings.push({ 
+        level: level, 
+        text: text, 
+        id: `heading-${headingId++}` 
+      });
+    }
+  }
+  return headings;
 }
 function escapeRegExp(string) {
 return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
